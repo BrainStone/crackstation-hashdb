@@ -3,7 +3,7 @@
 all: crackstation
 
 crackstation: crackstation.cpp
-	g++ -std=c++11 -Wall -O3 crackstation.cpp -lpthread -lcrypto -lopenssl -o crackstation
+	g++ -std=c++11 -Wall -O3 crackstation.cpp -lpthread -lcrypto -lssl -o crackstation
 
 clean:
 	rm -f crackstation
