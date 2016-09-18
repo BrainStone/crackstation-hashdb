@@ -3,7 +3,8 @@
 
 Note
 ----
-This is *not* the original crackstation-hashdb repository by @defuse, but a modified copy of it. In this version I try to rewrite all parts in C++ as a single binary
+This is *not* the original crackstation-hashdb repository by @defuse, but a modified copy of it. In this version I try to rewrite all parts in C++ as a single binary.  
+Also this version is **NOT** functional at the moment!
 
 Introduction
 ------------
