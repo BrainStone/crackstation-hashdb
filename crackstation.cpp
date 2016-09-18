@@ -103,6 +103,8 @@ int main () {
     break;
   }
   
+  cout << "Joining threads!" << endl;
+  
   for (i = 0; i < NUM_THREADS; i++)
     threads[i].join();
   
