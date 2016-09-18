@@ -91,10 +91,10 @@ int main () {
       else
         pos = fileIn.tellg();
       
-      cout << pos << '/' << fileSize << endl;
+      cout << '\r' << pos << '/' << fileSize << '(' << ((double) pos / fileSize * 100.0) << "%)";
     }
     
-    this_thread::sleep_for(chrono::milliseconds(1));
+    this_thread::sleep_for(chrono::milliseconds(100));
     
     for (i = 0; i < NUM_THREADS; i++)
       if (!threadReady[i])
@@ -109,5 +109,5 @@ int main () {
   fileIn.close();
   fileOut.close();
   
-  cout << "End!";
+  cout << "End!" << endl;
 }
