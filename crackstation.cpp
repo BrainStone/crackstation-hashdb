@@ -55,7 +55,7 @@ void computeHashes(atomic<bool>& threadReady, mutex& fileInMutex, mutex& fileOut
     {
       scoped_lock lock(fileOutMutex);
       
-      fileOut.write(write_buffer, WRITE_SIZE);
+      fileOut.write((const char*)write_buffer, WRITE_SIZE);
     }
   }
   
