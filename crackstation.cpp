@@ -38,18 +38,18 @@ void *PrintHello(void* toHash)
    string* strToHash = (string*)toHash;
    
    cout << "Hello World!" << endl;
-   cout << "String: " << *strTohash << endl;
+   cout << "String: " << *strToHash << endl;
    
-   char hash256[SHA256_DIGEST_LENGTH];
-   char hash512[SHA512_DIGEST_LENGTH];
+   unsigned char hash256[SHA256_DIGEST_LENGTH];
+   unsigned char hash512[SHA512_DIGEST_LENGTH];
    
    SHA256(strToHash->c_str(), strToHash->length(), hash256);
    
-   cout << "SHA256 of \"" << *strTohash << "\" is " << hex(hash256) << endl; 
+   cout << "SHA256 of \"" << *strToHash << "\" is " << hex(hash256) << endl; 
    
    SHA512(strToHash->c_str(), strToHash->length(), hash512);
    
-   cout << "SHA512 of \"" << *strTohash << "\" is " << hex(hash512) << endl; 
+   cout << "SHA512 of \"" << *strToHash << "\" is " << hex(hash512) << endl; 
    
    delete strToHash;
    
