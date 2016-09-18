@@ -73,7 +73,7 @@ int main () {
   ofstream fileOut("test/words-sha512.idx", ios::out | ios::trunc);
   
   const streampos fileSize = fileIn.tellg();
-  fileIn.seek(0);
+  fileIn.seekg(0);
   
   for (i = 0; i < NUM_THREADS; i++) {
     threadReady[i] = false;
