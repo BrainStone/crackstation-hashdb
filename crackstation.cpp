@@ -64,6 +64,7 @@ void computeHashes(atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOut
 
 int main () {
   int i;
+  bool runLoop = true;
   
   thread threads[NUM_THREADS];
   atomic<bool> threadReady[NUM_THREADS];
@@ -82,7 +83,7 @@ int main () {
     threads[i] = thread(computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut);
   }
   
-  while (true) {
+  while (runLoop) {
     {
       scoped_lock lock(fileInMutex);
       
@@ -97,10 +98,9 @@ int main () {
     this_thread::sleep_for(chrono::milliseconds(100));
     
     for (i = 0; i < NUM_THREADS; i++)
-      if (!threadReady[i])
-        continue;
-    
-    break;
+      runLoop &&= threadReady[i];
+      
+    runLoop = !runLoop;
   }
   
   cout << "Joining threads!" << endl;
