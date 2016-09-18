@@ -70,9 +70,10 @@ int main () {
   mutex fileInMutex;
   mutex fileOutMutex;
   ifstream fileIn("test/words.txt", ios::in | ios::ate);
-  ofstream fileOut("test/words-sha512.idx", ios::out | ios::trunc);
-  
+  ofstream fileOut("test/words-sha512.idx", ios::out | ios::trunc);  
   const streampos fileSize = fileIn.tellg();
+  streampos pos;
+  
   fileIn.seekg(0);
   
   for (i = 0; i < NUM_THREADS; i++) {
@@ -82,13 +83,18 @@ int main () {
   }
   
   while (true) {
-    this_thread::sleep_for(chrono::milliseconds(100));
-    
     {
       scoped_lock lock(fileInMutex);
       
-      cout << fileIn.tellg() << '/' << fileSize << endl;
+      if (fileIn.eof())
+        pos = fileSize;
+      else
+        pos = fileIn.tellg();
+      
+      cout << pos << '/' << fileSize << endl;
     }
+    
+    this_thread::sleep_for(chrono::milliseconds(10));
     
     for (i = 0; i < NUM_THREADS; i++)
       if (!threadReady[i])
