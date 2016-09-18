@@ -1,5 +1,9 @@
 test-index-files/
-sortidx
-checksort
+crackstation
 
 words-*.idx
+
+Assets/
+Debug/
+Release/
+crackstation-hashdb.vcxproj*
