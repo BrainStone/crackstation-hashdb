@@ -1,112 +1,102 @@
+#include <atomic>
+#include <chrono>
+#include <fstream>
 #include <iostream>
 #include <mutex>
 #include <string>
-#include <pthread.h>
+#include <thread>
+
 #include <openssl/sha.h>
 
 using namespace std;
 
 #define NUM_THREADS     5
-#define lcout           locked_cout()
+#define HASH_SIZE       8
+#define OFFSET_SIZE     6
+#define WRITE_SIZE      HASH_SIZE + OFFSET_SIZE
 
-// Lib-Code
+typedef lock_guard<mutex> scoped_lock;
 
-constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                           '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+/**
+ * Gets the nth byte from a var. The 0th byte is the right most byte numerically speaking.
+ * Or it gets the nth byte in little-endian.
+ */
+template<class T>
+constexpr unsigned char getNthByte(T var, size_t pos) {
+  return unsigned char(var >> (pos * 8) & 0xFF);
+}
 
-string hexStr(unsigned char* data, int len)
-{
-  string s(len * 2, ' ');
-  for (int i = 0; i < len; ++i) {
-    s[2 * i]     = hexmap[(data[i] & 0xF0) >> 4];
-    s[2 * i + 1] = hexmap[data[i] & 0x0F];
+void computeHashes(atomic<bool>& threadReady, mutex& fileInMutex, mutex& fileOutMutex, ifstream& fileIn, ofstream& fileOut) {
+  int i;
+  
+  string line;
+  streampos pos;
+  unsigned char hash512[SHA512_DIGEST_LENGTH];
+  unsigned char write_buffer[WRITE_SIZE];
+  
+  while (!fileIn.eof()) {
+    {
+      scoped_lock(fileInMutex);
+      
+      pos = fileIn.tellg();
+      getline(fileIn, line);
+    }
+    
+    SHA512((const unsigned char*)line.c_str(), line.length(), hash512);
+    
+    for (i = 0; i < HASH_SIZE; i++) {
+      write_buffer[i] = hash512[i];
+    }
+    
+    for (i = 0; i < OFFSET_SIZE; i++) {
+      write_buffer[i + HASH_SIZE] = getNthByte(pos, i);
+    }
+    
+    {
+      scoped_lock(fileOutMutex);
+      
+      fileOut.write(write_buffer, WRITE_SIZE);
+    }
   }
-  return s;
+  
+  threadReady = true; 
 }
 
-class locked_stream
-{
-    static mutex s_out_mutex;
-
-    unique_lock<mutex> lock_;
-    ostream* stream_; // can't make this reference so we can move
-
-public:
-    locked_stream(ostream& stream)
-        : lock_(s_out_mutex)
-        , stream_(&stream)
-    { }
-
-    locked_stream(locked_stream&& other)
-        : lock_(move(other.lock_))
-        , stream_(other.stream_)
+int main () {
+  int i;
+  
+  thread threads[NUM_THREADS];
+  atomic<bool> threadReady[NUM_THREADS];
+  mutex fileInMutex();
+  mutex fileOutMutex();
+  ifstream fileIn("test/words.txt", ios::in | ios::ate);
+  ofstream fileOut("test/words-sha512.idx", ios::out | ios::trunc);
+  
+  const streampos fileSize = fileIn.tellg();
+  fileIn.seek(0);
+  
+  for (i = 0; i < NUM_THREADS; i++) {
+    threadReady[i] = false;
+    
+    threads[i] = thread(threadReady[i], computeHashes, fileInMutex, fileOutMutex, fileIn, fileOut);
+  }
+  
+  while (true) {
+    this_thread::sleep_for(chrono::milliseconds(100));
+    
     {
-        other.stream_ = nullptr;
+      scoped_lock(fileInMutex);
+      
+      cout << fileIn.tellg() << '/' << size_t << endl;
     }
-
-    friend locked_stream&& operator << (locked_stream&& s, ostream& (*arg)(ostream&))
-    {
-        (*s.stream_) << arg;
-        return move(s);
-    }
-
-    template <typename Arg>
-    friend locked_stream&& operator << (locked_stream&& s, Arg&& arg)
-    {
-        (*s.stream_) << forward<Arg>(arg);
-        return move(s);
-    }
-};
-
-mutex locked_stream::s_out_mutex{};
-
-locked_stream locked_cout()
-{
-    return locked_stream(cout);
-}
-
-// Actual Code
-
-void *PrintHello(void* toHash)
-{
-   string* strToHash = (string*)toHash;
-   
-   lcout << "Hello World!" << endl;
-   lcout << "String: " << *strToHash << endl;
-   
-   unsigned char hash256[SHA256_DIGEST_LENGTH];
-   unsigned char hash512[SHA512_DIGEST_LENGTH];
-   
-   SHA256((const unsigned char*)strToHash->c_str(), strToHash->length(), hash256);
-   
-   lcout << "SHA256 of \"" << *strToHash << "\" is " << hexStr(hash256, sizeof hash256) << endl; 
-   
-   SHA512((const unsigned char*)strToHash->c_str(), strToHash->length(), hash512);
-   
-   lcout << "SHA512 of \"" << *strToHash << "\" is " << hexStr(hash512, sizeof hash512) << endl; 
-   
-   delete strToHash;
-   
-   pthread_exit(NULL);
-}
-
-int main ()
-{
-   pthread_t threads[NUM_THREADS];
-   int rc;
-   int i;
-   string testString = "TestString";
-   
-   for( i=0; i < NUM_THREADS; i++ ){
-      lcout << "main() : creating thread, " << i << endl;
-      rc = pthread_create(&threads[i], NULL, 
-                          PrintHello, (void*) new string(testString + to_string(i)) );
-      if (rc){
-         lcout << "Error: unable to create thread," << rc << endl;
-         
-         return -1;
-      }
-   }
-   
-   pthread_exit(NULL);
+    
+    for (i = 0; i < NUM_THREADS; i++)
+      if (!threadReady[i])
+        continue;
+    
+    break;
+  }
+  
+  fileIn.close();
+  fileOut.close();
 }
