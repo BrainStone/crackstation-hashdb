@@ -12,7 +12,7 @@ int main() {
 	atomic<bool> threadReady[numThreads];
 	mutex fileInMutex;
 	mutex fileOutMutex;
-	ifstream fileIn( "test/words.txt", ios::in | ios::ate );
+	ifstream fileIn( /*"test/words.txt"*/"/home/platecheck/crackstation-hashdb/crackstation.txt", ios::in | ios::ate );
 	ofstream fileOut( "test/words-sha512.idx", ios::out | ios::trunc );
 	const streampos fileSize = fileIn.tellg();
 	streampos pos;
@@ -24,6 +24,8 @@ int main() {
 
 		threads[i] = thread( computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut );
 	}
+
+	initProgress( fileSize );
 
 	while ( runLoop ) {
 		this_thread::sleep_for( chrono::milliseconds( 100 ) );
@@ -37,7 +39,7 @@ int main() {
 				pos = fileIn.tellg();
 		}
 
-		cout << '\r' << pos << '/' << fileSize << '(' << ((double)pos / fileSize * 100.0) << "%)" << flush;
+		printProgress( pos );
 
 		for ( i = 0; i < numThreads; i++ )
 			runLoop = runLoop && threadReady[i];

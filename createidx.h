@@ -4,6 +4,7 @@
 // Includes
 #include <atomic>
 #include <fstream>
+#include <iostream>
 #include <mutex>
 #include <string>
 
@@ -14,5 +15,8 @@
 
 // Functions
 void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut );
+
+void initProgress( std::streampos fileSize );
+void printProgress( std::streampos currentPos );
 
 #endif

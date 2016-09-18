@@ -2,6 +2,10 @@
 
 using namespace std;
 
+streampos totalFileSize;
+unsigned short formatPower;
+string fileSizeString;
+
 void computeHashes( atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOutMutex, ifstream* fileIn, ofstream* fileOut ) {
 	size_t i;
 
@@ -36,4 +40,25 @@ void computeHashes( atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOu
 	}
 
 	*threadReady = true;
+}
+
+void initProgress( streampos fileSize ) {
+	totalFileSize = fileSize;
+	formatPower = getBytePower( fileSize );
+	fileSizeString = getFormatedSize( fileSize, formatPower );
+}
+
+void printProgress( streampos currentPos ) {
+	int barWidth = getConsoleWidth() - 32;
+	double progress = (double)currentPos / totalFileSize;
+
+	cout << "\r\33[K[";
+	int pos = barWidth * progress;
+	for ( int i = 0; i < barWidth; ++i ) {
+		if ( i < pos ) cout << "=";
+		else if ( i == pos ) cout << ">";
+		else cout << " ";
+	}
+
+	cout << "] " << int( progress * 100.0 ) << " %" << getFormatedSize( currentPos, formatPower ) << " of " << fileSizeString << flush;
 }
