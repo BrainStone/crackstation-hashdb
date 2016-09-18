@@ -23,7 +23,7 @@ typedef lock_guard<mutex> scoped_lock;
  */
 template<class T>
 constexpr unsigned char getNthByte(T var, size_t pos) {
-  return unsigned char(var >> (pos * 8) & 0xFF);
+  return (unsigned char) var >> (pos * 8) & 0xFF;
 }
 
 void computeHashes(atomic<bool>& threadReady, mutex& fileInMutex, mutex& fileOutMutex, ifstream& fileIn, ofstream& fileOut) {
