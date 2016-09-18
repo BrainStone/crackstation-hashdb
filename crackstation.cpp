@@ -7,30 +7,17 @@ using namespace std;
 
 #define NUM_THREADS     5
 
-template<typename T>
-struct hex_t
-{
-    T x;
-};
+constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
+                           '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
-template<typename T>
-hex_t<T> hex(T x)
+string hexStr(unsigned char* data, int len)
 {
-    hex_t<T> h = {x};
-    return h;
-}
-
-template<typename T>
-std::ostream& operator<<(std::ostream& os, hex_t<T> h)
-{
-    char buffer[2 * sizeof(T)];
-    for (auto i = sizeof buffer; i--; )
-    {
-        buffer[i] = "0123456789ABCDEF"[h.x & 15];
-        h.x >>= 4;
-    }
-    os.write(buffer, sizeof buffer);
-    return os;
+  string s(len * 2, ' ');
+  for (int i = 0; i < len; ++i) {
+    s[2 * i]     = hexmap[(data[i] & 0xF0) >> 4];
+    s[2 * i + 1] = hexmap[data[i] & 0x0F];
+  }
+  return s;
 }
 
 void *PrintHello(void* toHash)
@@ -43,13 +30,13 @@ void *PrintHello(void* toHash)
    unsigned char hash256[SHA256_DIGEST_LENGTH];
    unsigned char hash512[SHA512_DIGEST_LENGTH];
    
-   SHA256(strToHash->c_str(), strToHash->length(), hash256);
+   SHA256((const unsigned char*)strToHash->c_str(), strToHash->length(), hash256);
    
-   cout << "SHA256 of \"" << *strToHash << "\" is " << hex(hash256) << endl; 
+   cout << "SHA256 of \"" << *strToHash << "\" is " << hexStr(hash256, sizeof hash256) << endl; 
    
-   SHA512(strToHash->c_str(), strToHash->length(), hash512);
+   SHA512((const unsigned char*)strToHash->c_str(), strToHash->length(), hash512);
    
-   cout << "SHA512 of \"" << *strToHash << "\" is " << hex(hash512) << endl; 
+   cout << "SHA512 of \"" << *strToHash << "\" is " << hexStr(hash512, sizeof hash512) << endl; 
    
    delete strToHash;
    
