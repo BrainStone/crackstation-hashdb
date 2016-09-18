@@ -94,7 +94,7 @@ int main () {
       cout << pos << '/' << fileSize << endl;
     }
     
-    this_thread::sleep_for(chrono::milliseconds(10));
+    this_thread::sleep_for(chrono::milliseconds(1));
     
     for (i = 0; i < NUM_THREADS; i++)
       if (!threadReady[i])
@@ -103,6 +103,11 @@ int main () {
     break;
   }
   
+  for (i = 0; i < NUM_THREADS; i++)
+    threads[i].join();
+  
   fileIn.close();
   fileOut.close();
+  
+  cout << "End!"
 }
