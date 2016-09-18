@@ -2,8 +2,12 @@
 #define CRACKSTATION_UTIL_H
 
 // Includes
+#include <mutex>
 #include <stddef.h>
 #include <thread>
+
+// Typedefs
+typedef std::lock_guard<std::mutex> scoped_lock;
 
 // Functions
 /**
