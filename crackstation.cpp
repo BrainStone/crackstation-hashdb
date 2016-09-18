@@ -7,7 +7,7 @@
 using namespace std;
 
 #define NUM_THREADS     5
-#define cout            locked_cout()
+#define lcout           locked_cout()
 
 // Lib-Code
 
@@ -62,7 +62,7 @@ mutex locked_stream::s_out_mutex{};
 
 locked_stream locked_cout()
 {
-    return locked_stream(std::cout);
+    return locked_stream(cout);
 }
 
 // Actual Code
@@ -71,19 +71,19 @@ void *PrintHello(void* toHash)
 {
    string* strToHash = (string*)toHash;
    
-   cout << "Hello World!" << endl;
-   cout << "String: " << *strToHash << endl;
+   lcout << "Hello World!" << endl;
+   lcout << "String: " << *strToHash << endl;
    
    unsigned char hash256[SHA256_DIGEST_LENGTH];
    unsigned char hash512[SHA512_DIGEST_LENGTH];
    
    SHA256((const unsigned char*)strToHash->c_str(), strToHash->length(), hash256);
    
-   cout << "SHA256 of \"" << *strToHash << "\" is " << hexStr(hash256, sizeof hash256) << endl; 
+   lcout << "SHA256 of \"" << *strToHash << "\" is " << hexStr(hash256, sizeof hash256) << endl; 
    
    SHA512((const unsigned char*)strToHash->c_str(), strToHash->length(), hash512);
    
-   cout << "SHA512 of \"" << *strToHash << "\" is " << hexStr(hash512, sizeof hash512) << endl; 
+   lcout << "SHA512 of \"" << *strToHash << "\" is " << hexStr(hash512, sizeof hash512) << endl; 
    
    delete strToHash;
    
@@ -98,11 +98,11 @@ int main ()
    string testString = "TestString";
    
    for( i=0; i < NUM_THREADS; i++ ){
-      cout << "main() : creating thread, " << i << endl;
+      lcout << "main() : creating thread, " << i << endl;
       rc = pthread_create(&threads[i], NULL, 
                           PrintHello, (void*) new string(testString + to_string(i)) );
       if (rc){
-         cout << "Error: unable to create thread," << rc << endl;
+         lcout << "Error: unable to create thread," << rc << endl;
          
          return -1;
       }
