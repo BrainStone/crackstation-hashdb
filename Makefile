@@ -1,15 +1,12 @@
 .PHONY: all clean test testclean
 
-all: sortidx checksort
+all: crackstation
 
-sortidx: sortidx.c
-	gcc -Wall -O3 sortidx.c -o sortidx
-
-checksort: checksort.c
-	gcc -Wall -O3 checksort.c -o checksort
+crackstation: crackstation.cpp
+	g++ -Wall -O3 crackstation.cpp -lpthread -o crackstation
 
 clean:
-	rm -f sortidx checksort
+	rm -f crackstation
 
 test:
 	./test/test.sh
