@@ -67,8 +67,8 @@ int main () {
   
   thread threads[NUM_THREADS];
   atomic<bool> threadReady[NUM_THREADS];
-  mutex fileInMutex();
-  mutex fileOutMutex();
+  mutex fileInMutex;
+  mutex fileOutMutex;
   ifstream fileIn("test/words.txt", ios::in | ios::ate);
   ofstream fileOut("test/words-sha512.idx", ios::out | ios::trunc);
   
@@ -85,7 +85,7 @@ int main () {
     this_thread::sleep_for(chrono::milliseconds(100));
     
     {
-      scoped_lock lock(&fileInMutex);
+      scoped_lock lock(fileInMutex);
       
       cout << fileIn.tellg() << '/' << fileSize << endl;
     }
