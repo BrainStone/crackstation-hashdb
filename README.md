@@ -1,6 +1,10 @@
 [CrackStation.net](http://crackstation.net/)'s Lookup Tables
 ============================================================
 
+Note
+----
+This is *not* the original crackstation-hashdb repository by @defuse, but a modified copy of it. In this version I try to rewrite all parts in C++ as a single binary
+
 Introduction
 ------------
 
