@@ -1,4 +1,5 @@
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <pthread.h>
 #include <openssl/sha.h>
@@ -25,39 +26,39 @@ string hexStr(unsigned char* data, int len)
 
 class locked_stream
 {
-    static std::mutex s_out_mutex;
+    static mutex s_out_mutex;
 
-    std::unique_lock<std::mutex> lock_;
-    std::ostream* stream_; // can't make this reference so we can move
+    unique_lock<mutex> lock_;
+    ostream* stream_; // can't make this reference so we can move
 
 public:
-    locked_stream(std::ostream& stream)
+    locked_stream(ostream& stream)
         : lock_(s_out_mutex)
         , stream_(&stream)
     { }
 
     locked_stream(locked_stream&& other)
-        : lock_(std::move(other.lock_))
+        : lock_(move(other.lock_))
         , stream_(other.stream_)
     {
         other.stream_ = nullptr;
     }
 
-    friend locked_stream&& operator << (locked_stream&& s, std::ostream& (*arg)(std::ostream&))
+    friend locked_stream&& operator << (locked_stream&& s, ostream& (*arg)(ostream&))
     {
         (*s.stream_) << arg;
-        return std::move(s);
+        return move(s);
     }
 
     template <typename Arg>
     friend locked_stream&& operator << (locked_stream&& s, Arg&& arg)
     {
-        (*s.stream_) << std::forward<Arg>(arg);
-        return std::move(s);
+        (*s.stream_) << forward<Arg>(arg);
+        return move(s);
     }
 };
 
-std::mutex locked_stream::s_out_mutex{};
+mutex locked_stream::s_out_mutex{};
 
 locked_stream locked_cout()
 {
