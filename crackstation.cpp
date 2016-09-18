@@ -92,7 +92,7 @@ int main () {
       else
         pos = fileIn.tellg();
       
-      cout << '\r' << pos << '/' << fileSize << '(' << ((double) pos / fileSize * 100.0) << "%)";
+      cout << '\r' << pos << '/' << fileSize << '(' << ((double) pos / fileSize * 100.0) << "%)" << flush;
     }
     
     this_thread::sleep_for(chrono::milliseconds(100));
