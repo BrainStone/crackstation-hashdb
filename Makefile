@@ -18,7 +18,7 @@ DCOMPILE_FLAGS = -D __DEBUG__
 # Add additional include paths
 INCLUDES = -I $(SRC_PATH)
 # General linker settings
-LINK_FLAGS =
+LINK_FLAGS = -lpthread
 # Additional release-specific linker settings
 RLINK_FLAGS =
 # Additional debug-specific linker settings

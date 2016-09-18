@@ -1,5 +1,8 @@
 test-index-files/
 crackstation
+bin/
+build/
+.debug_time
 
 words-*.idx
 
