@@ -70,3 +70,8 @@ breaking the indexes. Appending to the wordlist is safe in that it will not
 break the indexes, but the words you append  won't be indexed, unless you
 re-generate the index. There is currently no way to add words to an index
 without re-generating the entire index.
+
+Credits
+-------
+
+The password list used as an example is from http://www.whatsmypass.com/the-top-500-worst-passwords-of-all-time
