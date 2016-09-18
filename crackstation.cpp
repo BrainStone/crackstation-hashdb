@@ -10,7 +10,6 @@
 
 using namespace std;
 
-#define NUM_THREADS     5
 #define HASH_SIZE       8
 #define OFFSET_SIZE     6
 #define WRITE_SIZE      HASH_SIZE + OFFSET_SIZE
@@ -62,12 +61,23 @@ void computeHashes(atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOut
   *threadReady = true; 
 }
 
+size_t getNumCores() {
+  size_t out = thread::hardware_concurrency();
+  
+  if (out == 0)
+    return 1;
+  else
+    return out;
+}
+
 int main () {
   int i;
   bool runLoop = true;
   
-  thread threads[NUM_THREADS];
-  atomic<bool> threadReady[NUM_THREADS];
+  const size_t numThreads = getNumCores();
+  
+  thread threads[numThreads];
+  atomic<bool> threadReady[numThreads];
   mutex fileInMutex;
   mutex fileOutMutex;
   ifstream fileIn("test/words.txt", ios::in | ios::ate);
@@ -77,7 +87,7 @@ int main () {
   
   fileIn.seekg(0);
   
-  for (i = 0; i < NUM_THREADS; i++) {
+  for (i = 0; i < numThreads; i++) {
     threadReady[i] = false;
     
     threads[i] = thread(computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut);
@@ -97,13 +107,13 @@ int main () {
     
     this_thread::sleep_for(chrono::milliseconds(100));
     
-    for (i = 0; i < NUM_THREADS; i++)
+    for (i = 0; i < numThreads; i++)
       runLoop = runLoop && threadReady[i];
       
     runLoop = !runLoop;
   }
   
-  cout << "Joining threads!" << endl;
+  cout << endl << "Joining threads!" << endl;
   
   for (i = 0; i < NUM_THREADS; i++)
     threads[i].join();
