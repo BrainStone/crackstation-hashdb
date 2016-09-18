@@ -2,6 +2,10 @@
 
 all: crackstation
 
+release: all
+
+debug: all
+
 crackstation: crackstation.cpp
 	g++ -std=c++11 -Wall -O3 crackstation.cpp -lpthread -lcrypto -lssl -o crackstation
 
