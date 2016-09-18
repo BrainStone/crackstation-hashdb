@@ -78,7 +78,7 @@ int main () {
   for (i = 0; i < NUM_THREADS; i++) {
     threadReady[i] = false;
     
-    threads[i] = thread(&threadReady[i], &computeHashes, &fileInMutex, &fileOutMutex, &fileIn, &fileOut);
+    threads[i] = thread(computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut);
   }
   
   while (true) {
