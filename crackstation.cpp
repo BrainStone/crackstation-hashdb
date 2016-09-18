@@ -36,7 +36,7 @@ void computeHashes(atomic<bool>& threadReady, mutex& fileInMutex, mutex& fileOut
   
   while (!fileIn.eof()) {
     {
-      scoped_lock(fileInMutex);
+      scoped_lock lock(fileInMutex);
       
       pos = fileIn.tellg();
       getline(fileIn, line);
@@ -53,7 +53,7 @@ void computeHashes(atomic<bool>& threadReady, mutex& fileInMutex, mutex& fileOut
     }
     
     {
-      scoped_lock(fileOutMutex);
+      scoped_lock lock(fileOutMutex);
       
       fileOut.write(write_buffer, WRITE_SIZE);
     }
@@ -85,7 +85,7 @@ int main () {
     this_thread::sleep_for(chrono::milliseconds(100));
     
     {
-      scoped_lock(fileInMutex);
+      scoped_lock lock(fileInMutex);
       
       cout << fileIn.tellg() << '/' << size_t << endl;
     }
