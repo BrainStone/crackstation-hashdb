@@ -6,6 +6,9 @@
 using namespace std;
 
 #define NUM_THREADS     5
+#define cout            locked_cout()
+
+// Lib-Code
 
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
@@ -19,6 +22,49 @@ string hexStr(unsigned char* data, int len)
   }
   return s;
 }
+
+class locked_stream
+{
+    static std::mutex s_out_mutex;
+
+    std::unique_lock<std::mutex> lock_;
+    std::ostream* stream_; // can't make this reference so we can move
+
+public:
+    locked_stream(std::ostream& stream)
+        : lock_(s_out_mutex)
+        , stream_(&stream)
+    { }
+
+    locked_stream(locked_stream&& other)
+        : lock_(std::move(other.lock_))
+        , stream_(other.stream_)
+    {
+        other.stream_ = nullptr;
+    }
+
+    friend locked_stream&& operator << (locked_stream&& s, std::ostream& (*arg)(std::ostream&))
+    {
+        (*s.stream_) << arg;
+        return std::move(s);
+    }
+
+    template <typename Arg>
+    friend locked_stream&& operator << (locked_stream&& s, Arg&& arg)
+    {
+        (*s.stream_) << std::forward<Arg>(arg);
+        return std::move(s);
+    }
+};
+
+std::mutex locked_stream::s_out_mutex{};
+
+locked_stream locked_cout()
+{
+    return locked_stream(std::cout);
+}
+
+// Actual Code
 
 void *PrintHello(void* toHash)
 {
