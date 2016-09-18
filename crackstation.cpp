@@ -26,7 +26,7 @@ constexpr unsigned char getNthByte(T var, size_t pos) {
   return (unsigned char) var >> (pos * 8) & 0xFF;
 }
 
-void computeHashes(atomic<bool>& threadReady, mutex& fileInMutex, mutex& fileOutMutex, ifstream& fileIn, ofstream& fileOut) {
+void computeHashes(atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOutMutex, ifstream* fileIn, ofstream* fileOut) {
   int i;
   
   string line;
@@ -34,12 +34,12 @@ void computeHashes(atomic<bool>& threadReady, mutex& fileInMutex, mutex& fileOut
   unsigned char hash512[SHA512_DIGEST_LENGTH];
   unsigned char write_buffer[WRITE_SIZE];
   
-  while (!fileIn.eof()) {
+  while (!fileIn->eof()) {
     {
-      scoped_lock lock(fileInMutex);
+      scoped_lock lock(*fileInMutex);
       
-      pos = fileIn.tellg();
-      getline(fileIn, line);
+      pos = fileIn->tellg();
+      getline(*fileIn, line);
     }
     
     SHA512((const unsigned char*)line.c_str(), line.length(), hash512);
@@ -53,13 +53,13 @@ void computeHashes(atomic<bool>& threadReady, mutex& fileInMutex, mutex& fileOut
     }
     
     {
-      scoped_lock lock(fileOutMutex);
+      scoped_lock lock(*fileOutMutex);
       
-      fileOut.write((const char*)write_buffer, WRITE_SIZE);
+      fileOut->write((const char*)write_buffer, WRITE_SIZE);
     }
   }
   
-  threadReady = true; 
+  *threadReady = true; 
 }
 
 int main () {
@@ -78,7 +78,7 @@ int main () {
   for (i = 0; i < NUM_THREADS; i++) {
     threadReady[i] = false;
     
-    threads[i] = thread(threadReady[i], computeHashes, fileInMutex, fileOutMutex, fileIn, fileOut);
+    threads[i] = thread(&threadReady[i], &computeHashes, &fileInMutex, &fileOutMutex, &fileIn, &fileOut);
   }
   
   while (true) {
