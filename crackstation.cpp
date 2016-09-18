@@ -71,7 +71,7 @@ size_t getNumCores() {
 }
 
 int main () {
-  int i;
+  size_t i;
   bool runLoop = true;
   
   const size_t numThreads = getNumCores();
@@ -115,7 +115,7 @@ int main () {
   
   cout << endl << "Joining threads!" << endl;
   
-  for (i = 0; i < NUM_THREADS; i++)
+  for (i = 0; i < numThreads; i++)
     threads[i].join();
   
   fileIn.close();
