@@ -46,13 +46,15 @@ void initProgress( streampos fileSize ) {
 	totalFileSize = fileSize;
 	formatPower = getBytePower( fileSize );
 	fileSizeString = getFormatedSize( fileSize, formatPower );
+
+	cout << "\33[?25l";
 }
 
 void printProgress( streampos currentPos ) {
-	int barWidth = getConsoleWidth() - 32;
+	int barWidth = getConsoleWidth() - 35;
 	double progress = (double)currentPos / totalFileSize;
 
-	cout << "\r\33[K[";
+	cout << "\33[s\33[K[";
 	int pos = barWidth * progress;
 	for ( int i = 0; i < barWidth; ++i ) {
 		if ( i < pos ) cout << "=";
@@ -60,5 +62,6 @@ void printProgress( streampos currentPos ) {
 		else cout << " ";
 	}
 
-	cout << "] " << int( progress * 100.0 ) << " %" << getFormatedSize( currentPos, formatPower ) << " of " << fileSizeString << flush;
+	cout << "] " << setw( 5 ) << fixed << setprecision( 1 ) << progress * 100.0 << "% "
+		<< getFormatedSize( currentPos, formatPower ) << " / " << fileSizeString << "\33[u" << flush;
 }

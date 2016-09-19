@@ -47,7 +47,7 @@ int main() {
 		runLoop = !runLoop;
 	}
 
-	cout << endl << "Joining threads!" << endl;
+	cout << endl << "\33[?25hJoining threads!" << endl;
 
 	for ( i = 0; i < numThreads; i++ )
 		threads[i].join();
