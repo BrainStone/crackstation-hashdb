@@ -6,8 +6,9 @@ streampos totalFileSize;
 unsigned short formatPower;
 string fileSizeString;
 
-void createIDX( string wordlist, string idxFile, string hash ) {
-	cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hash << " hash..." << endl;
+void createIDX( string wordlist, string idxFile, string hash, bool quiet ) {
+	if ( !quiet )
+		cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hash << " hash..." << endl;
 
 	size_t i;
 	bool runLoop = true;
@@ -31,29 +32,31 @@ void createIDX( string wordlist, string idxFile, string hash ) {
 		threads[i] = thread( computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut );
 	}
 
-	initProgress( fileSize );
+	if ( !quiet ) {
+		initProgress( fileSize );
 
-	while ( runLoop ) {
-		this_thread::sleep_for( chrono::milliseconds( 100 ) );
+		while ( runLoop ) {
+			this_thread::sleep_for( chrono::milliseconds( 100 ) );
 
-		{
-			scoped_lock lock( fileInMutex );
+			{
+				scoped_lock lock( fileInMutex );
 
-			if ( fileIn.eof() )
-				pos = fileSize;
-			else
-				pos = fileIn.tellg();
+				if ( fileIn.eof() )
+					pos = fileSize;
+				else
+					pos = fileIn.tellg();
+			}
+
+			printProgress( pos );
+
+			for ( i = 0; i < numThreads; i++ )
+				runLoop = runLoop && threadReady[i];
+
+			runLoop = !runLoop;
 		}
 
-		printProgress( pos );
-
-		for ( i = 0; i < numThreads; i++ )
-			runLoop = runLoop && threadReady[i];
-
-		runLoop = !runLoop;
+		cout << "\33[?25h" << endl;
 	}
-
-	cout << "\33[?25h" << endl;
 
 	for ( i = 0; i < numThreads; i++ )
 		threads[i].join();
@@ -61,7 +64,8 @@ void createIDX( string wordlist, string idxFile, string hash ) {
 	fileIn.close();
 	fileOut.close();
 
-	cout << "Done!" << endl;
+	if ( !quiet )
+		cout << "Done!" << endl;
 }
 
 void computeHashes( atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOutMutex, ifstream* fileIn, ofstream* fileOut ) {
