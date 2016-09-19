@@ -17,8 +17,13 @@ constexpr size_t hashSize = 8;
 constexpr size_t offsetSize = 6;
 constexpr size_t writeSize = hashSize + offsetSize;
 
-// Typedefs
+// Typedefs & Structs
 typedef std::lock_guard<std::mutex> scoped_lock;
+
+struct IndexEntry {
+	unsigned char hash[hashSize]; // First 64 bits of the hash
+	unsigned char position[offsetSize]; // Position of word in dictionary (48-bit little endian integer)
+};
 
 // Functions
 /**

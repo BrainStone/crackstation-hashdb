@@ -76,9 +76,12 @@ void computeHashes( atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOu
 	unsigned char hash512[SHA512_DIGEST_LENGTH];
 	unsigned char writeBuffer[writeSize];
 
-	while ( !fileIn->eof() ) {
+	while ( true ) {
 		{
 			scoped_lock lock( *fileInMutex );
+
+			if ( fileIn->eof() )
+				break;
 
 			pos = fileIn->tellg();
 			getline( *fileIn, line );
