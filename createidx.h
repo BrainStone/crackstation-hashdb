@@ -10,10 +10,10 @@
 
 #include <openssl/sha.h>
 
-#include "main.h"
 #include "util.h"
 
 // Functions
+void createIDX( std::string wordlist, std::string idxFile, std::string hash );
 void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut );
 
 void initProgress( std::streampos fileSize );
