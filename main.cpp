@@ -11,11 +11,11 @@ const option::Descriptor usage[] =
 {
 	{ UNKNOWN, 0, "" , ""      , option::Arg::None, "USAGE:\n"
 													"  Create dictionary:\n"
-													"    crackstation -c [-v] [-q] <wordlist> <dictionary> <hashtype>\n"
+													"    crackstation -c [-v] [-q] <wordlist> <dictionary> <hashtype>\n\n"
 													"  Find hash in dictionary:\n"
-													"    crackstation [-q] <wordlist> <dictionary> <hashtype> [hashes...]\n"
+													"    crackstation [-q] <wordlist> <dictionary> <hashtype> [hashes...]\n\n"
 													"  Verify dictionary:\n"
-													"    crackstation -v [-q] <dictionary>\n\n"
+													"    crackstation -v [-q] <dictionary>\n\n\n"
 													"Options:" },
 	{ HELP   , 0, "h", "help"  , option::Arg::None, "  --help,   -h   \tPrint usage and exit." },
 	{ CREATE , 0, "c", "create", option::Arg::None, "  --create, -c   \tCreates the dictionary from the wordlist." },
