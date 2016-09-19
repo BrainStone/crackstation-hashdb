@@ -32,7 +32,7 @@ void createIDX( string wordlist, string idxFile, string hash, bool quiet ) {
 		initProgress( fileSize, true );
 
 		while ( runLoop ) {
-			this_thread::sleep_for( chrono::milliseconds( 100 ) );
+			this_thread::sleep_for( chrono::milliseconds( defaultTimeout ) );
 
 			{
 				scoped_lock lock( fileInMutex );

@@ -26,12 +26,12 @@ constexpr size_t getRight( size_t i ) {
 
 void sortIDX( std::string idxFile, bool quiet );
 
-void sortStepOne( std::fstream* file, size_t heapifyLimit );
-void sortStepTwo( std::fstream* file, size_t numDataSets );
+void heapifyIDX( size_t heapifyLimit );
+void sortIDXHeap( size_t numDataSets );
 
-void readData( std::fstream* file, IndexEntry* entry, size_t pos );
-void writeData( std::fstream* file, IndexEntry* entry, size_t pos );
+void readData( IndexEntry* entry, size_t pos );
+void writeData( IndexEntry* entry, size_t pos );
 bool isInHeap( size_t pos );
-void orderHeap( std::fstream* file, IndexEntry &top, size_t posTop );
+void orderHeap( IndexEntry &top, size_t posTop );
 
 #endif

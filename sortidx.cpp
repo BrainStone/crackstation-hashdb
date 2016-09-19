@@ -6,72 +6,70 @@ streampos fileSize;
 size_t numDataSets;
 size_t limit;
 atomic<size_t> pos;
+fstream* file;
 
 void sortIDX( string idxFile, bool quiet ) {
 	if ( !quiet )
 		cout << "Sorting index (may take a while)..." << endl;
 
-	fstream file( idxFile, ios::in | ios::out | ios::binary | ios::ate );
-	fileSize = file.tellg();
+	file = new fstream( idxFile, ios::in | ios::out | ios::binary | ios::ate );
+	fileSize = file->tellg();
 	numDataSets = fileSize / writeSize;
 	limit = numDataSets - 1;
 	const size_t localLimit = limit;
 	const size_t heapifyLimit = getParent( limit );
 	thread* sorterThread;
 
-	sorterThread = new thread( sortStepOne, &file, heapifyLimit );
+	sorterThread = new thread( heapifyIDX, heapifyLimit );
 
 	if ( !quiet ) {
 		initProgress( heapifyLimit + localLimit, false );
 
 		while ( pos <= heapifyLimit ) {
-			this_thread::sleep_for( chrono::milliseconds( 100 ) );
+			this_thread::sleep_for( chrono::milliseconds( defaultTimeout ) );
 
 			printProgress( (size_t)pos );
 		}
-
-		printProgress( heapifyLimit );
 	}
 
 	sorterThread->join();
 	delete sorterThread;
 
 	pos = 0;
-	sorterThread = new thread( sortStepTwo, &file, localLimit );
+	sorterThread = new thread( sortIDXHeap, localLimit );
 
 	if ( !quiet ) {
 		while ( pos < localLimit ) {
-			this_thread::sleep_for( chrono::milliseconds( 100 ) );
+			this_thread::sleep_for( chrono::milliseconds( defaultTimeout ) );
 
 			printProgress( heapifyLimit + pos );
 		}
-
-		printProgress( heapifyLimit + localLimit );
 	}
 
 	sorterThread->join();
 	delete sorterThread;
 
-	file.close();
+	file->close();
+	delete file;
 
 	if ( !quiet )
 		cout << "\33[?25h\nSorting complete complete." << endl;
 }
 
-void sortStepOne( fstream* file, size_t heapifyLimit ) {
+void heapifyIDX( size_t heapifyLimit ) {
 	IndexEntry top;
 	size_t posTop;
 
 	for ( pos = 0; pos <= heapifyLimit; pos++ ) {
 		posTop = heapifyLimit - pos;
 
-		readData( file, &top, posTop );
+		readData( &top, posTop );
 
-		orderHeap( file, top, posTop );
+		orderHeap( top, posTop );
 	}
 }
 
-void sortStepTwo( std::fstream* file, size_t numDataSets ) {
+void sortIDXHeap( size_t numDataSets ) {
 	IndexEntry last;
 	IndexEntry top;
 	size_t posLast;
@@ -82,20 +80,20 @@ void sortStepTwo( std::fstream* file, size_t numDataSets ) {
 		posTop = 0;
 		limit = posLast - 1;
 
-		readData( file, &last, posTop );
-		readData( file, &top, posLast );
-		writeData( file, &last, posLast );
+		readData( &last, posTop );
+		readData( &top, posLast );
+		writeData( &last, posLast );
 
-		orderHeap( file, top, posTop );
+		orderHeap( top, posTop );
 	}
 }
 
-void readData( fstream* file, IndexEntry* entry, size_t pos ) {
+void readData( IndexEntry* entry, size_t pos ) {
 	file->seekg( pos * writeSize );
 	file->read( (char*)entry, writeSize );
 }
 
-void writeData( fstream* file, IndexEntry* entry, size_t pos ) {
+void writeData( IndexEntry* entry, size_t pos ) {
 	file->seekp( pos * writeSize );
 	file->write( (char*)entry, writeSize );
 }
@@ -104,7 +102,7 @@ bool isInHeap( size_t pos ) {
 	return pos <= limit;
 }
 
-void orderHeap( fstream* file, IndexEntry &top, size_t posTop ) {
+void orderHeap( IndexEntry &top, size_t posTop ) {
 	static IndexEntry left;
 	static IndexEntry right;
 	static size_t posLeft;
@@ -116,14 +114,14 @@ void orderHeap( fstream* file, IndexEntry &top, size_t posTop ) {
 		posRight = getRight( posTop );
 
 		if ( isInHeap( posLeft ) ) {
-			readData( file, &left, posLeft );
+			readData( &left, posLeft );
 
 			if ( isInHeap( posRight ) ) {
-				readData( file, &right, posRight );
+				readData( &right, posRight );
 
 				if ( right > left ) {
 					if ( right > top ) {
-						writeData( file, &right, posTop );
+						writeData( &right, posTop );
 						posTop = posRight;
 
 						swapped = true;
@@ -132,7 +130,7 @@ void orderHeap( fstream* file, IndexEntry &top, size_t posTop ) {
 					}
 				} else {
 					if ( left > top ) {
-						writeData( file, &left, posTop );
+						writeData( &left, posTop );
 						posTop = posLeft;
 
 						swapped = true;
@@ -142,7 +140,7 @@ void orderHeap( fstream* file, IndexEntry &top, size_t posTop ) {
 				}
 			} else {
 				if ( left > top ) {
-					writeData( file, &left, posTop );
+					writeData( &left, posTop );
 					posTop = posLeft;
 
 					swapped = true;
@@ -155,5 +153,5 @@ void orderHeap( fstream* file, IndexEntry &top, size_t posTop ) {
 		}
 	} while ( swapped );
 
-	writeData( file, &top, posTop );
+	writeData( &top, posTop );
 }

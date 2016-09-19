@@ -17,6 +17,7 @@
 constexpr size_t hashSize = 8;
 constexpr size_t offsetSize = 6;
 constexpr size_t writeSize = hashSize + offsetSize;
+constexpr long long defaultTimeout = 100;
 
 // Typedefs & Structs
 typedef std::lock_guard<std::mutex> scoped_lock;
