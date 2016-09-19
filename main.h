@@ -6,6 +6,7 @@
 #include <string>
 
 #include "createidx.h"
+#include "sortidx.h"
 #include "util.h"
 
 // Functions

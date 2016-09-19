@@ -2,6 +2,22 @@
 
 using namespace std;
 
+streampos totalFileSize;
+unsigned short formatPower;
+string fileSizeString;
+bool renderWithFileSize;
+
+bool operator>( const IndexEntry &rhs, const IndexEntry &lhs ) {
+	for ( size_t i = 0; i < hashSize; i++ ) {
+		if ( rhs.hash[i] > lhs.hash[i] )
+			return true;
+		else if ( rhs.hash[i] < lhs.hash[i] )
+			return false;
+	}
+
+	return false;
+}
+
 struct winsize getConsoleSize() {
 	struct winsize size;
 	ioctl( STDOUT_FILENO, TIOCGWINSZ, &size );
@@ -60,4 +76,33 @@ std::string getFormatedSize( std::streampos size, int power ) {
 	ss << ' ' << getBytePowerPostfix( formatPower );
 
 	return ss.str();
+}
+
+void initProgress( streampos fileSize, bool withFileSize ) {
+	totalFileSize = fileSize;
+	formatPower = getBytePower( fileSize );
+	fileSizeString = getFormatedSize( fileSize, formatPower );
+	renderWithFileSize = withFileSize;
+
+	cout << "\33[?25l";
+}
+
+void printProgress( streampos currentPos ) {
+	int barWidth = getConsoleWidth() - (renderWithFileSize ? 35 : 9);
+	double progress = (double)currentPos / totalFileSize;
+
+	cout << "\33[s\33[K[";
+	int pos = barWidth * progress;
+	for ( int i = 0; i < barWidth; ++i ) {
+		if ( i < pos ) cout << "=";
+		else if ( i == pos ) cout << ">";
+		else cout << " ";
+	}
+
+	cout << "] " << setw( 5 ) << fixed << setprecision( 1 ) << progress * 100.0 << "%";
+
+	if ( renderWithFileSize )
+		cout << ' ' << getFormatedSize( currentPos, formatPower ) << " / " << fileSizeString;
+
+	cout << "\33[u" << flush;
 }

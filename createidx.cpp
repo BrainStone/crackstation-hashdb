@@ -2,10 +2,6 @@
 
 using namespace std;
 
-streampos totalFileSize;
-unsigned short formatPower;
-string fileSizeString;
-
 void createIDX( string wordlist, string idxFile, string hash, bool quiet ) {
 	if ( !quiet )
 		cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hash << " hash..." << endl;
@@ -33,7 +29,7 @@ void createIDX( string wordlist, string idxFile, string hash, bool quiet ) {
 	}
 
 	if ( !quiet ) {
-		initProgress( fileSize );
+		initProgress( fileSize, true );
 
 		while ( runLoop ) {
 			this_thread::sleep_for( chrono::milliseconds( 100 ) );
@@ -105,28 +101,4 @@ void computeHashes( atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOu
 	}
 
 	*threadReady = true;
-}
-
-void initProgress( streampos fileSize ) {
-	totalFileSize = fileSize;
-	formatPower = getBytePower( fileSize );
-	fileSizeString = getFormatedSize( fileSize, formatPower );
-
-	cout << "\33[?25l";
-}
-
-void printProgress( streampos currentPos ) {
-	int barWidth = getConsoleWidth() - 35;
-	double progress = (double)currentPos / totalFileSize;
-
-	cout << "\33[s\33[K[";
-	int pos = barWidth * progress;
-	for ( int i = 0; i < barWidth; ++i ) {
-		if ( i < pos ) cout << "=";
-		else if ( i == pos ) cout << ">";
-		else cout << " ";
-	}
-
-	cout << "] " << setw( 5 ) << fixed << setprecision( 1 ) << progress * 100.0 << "% "
-		<< getFormatedSize( currentPos, formatPower ) << " / " << fileSizeString << "\33[u" << flush;
 }

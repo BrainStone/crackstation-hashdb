@@ -49,6 +49,8 @@ int main( int argc, char* argv[] ) {
 		for ( option::Option* opt = options[UNKNOWN]; opt; opt = opt->next() )
 			cout << "Unknown option: " << opt->name << "\n";
 
-	if ( options[CREATE] )
+	if ( options[CREATE] ) {
 		createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), options[QUIET] );
+		sortIDX( parse.nonOption( 1 ), options[QUIET] );
+	}
 }
