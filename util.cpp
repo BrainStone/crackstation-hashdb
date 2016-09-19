@@ -94,12 +94,12 @@ void printProgress( streampos currentPos ) {
 	cout << "\33[s\33[K[";
 	int pos = barWidth * progress;
 	for ( int i = 0; i < barWidth; ++i ) {
-		if ( i < pos ) cout << "=";
-		else if ( i == pos ) cout << ">";
-		else cout << " ";
+		if ( i < pos ) cout << '=';
+		else if ( i == pos ) cout << '>';
+		else cout << ' ';
 	}
 
-	cout << "] " << setw( 5 ) << fixed << setprecision( 1 ) << progress * 100.0 << "%";
+	cout << "] " << setw( 5 ) << fixed << setprecision( 1 ) << progress * 100.0 << '%';
 
 	if ( renderWithFileSize )
 		cout << ' ' << getFormatedSize( currentPos, formatPower ) << " / " << fileSizeString;

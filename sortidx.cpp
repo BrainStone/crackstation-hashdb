@@ -9,7 +9,7 @@ atomic<size_t> pos;
 
 void sortIDX( string idxFile, bool quiet ) {
 	if ( !quiet )
-		cout << "Sorting index..." << endl;
+		cout << "Sorting index (may take a while)..." << endl;
 
 	fstream file( idxFile, ios::in | ios::out | ios::binary | ios::ate );
 	fileSize = file.tellg();
@@ -21,7 +21,7 @@ void sortIDX( string idxFile, bool quiet ) {
 	sorterThread = new thread( sortStepOne, &file, heapifyLimit );
 
 	if ( !quiet ) {
-		initProgress( heapifyLimit, false );
+		initProgress( heapifyLimit + limit, false );
 
 		while ( pos < heapifyLimit ) {
 			this_thread::sleep_for( chrono::milliseconds( 100 ) );
@@ -30,18 +30,31 @@ void sortIDX( string idxFile, bool quiet ) {
 		}
 
 		printProgress( heapifyLimit );
-
-		cout << "\33[?25h\nStep 1 complete." << endl;
 	}
 
 	sorterThread->join();
 	delete sorterThread;
 
+	pos = 0;
+	sorterThread = new thread( sortStepTwo, &file, numDataSets );
+
+	if ( !quiet ) {
+		while ( pos < limit ) {
+			this_thread::sleep_for( chrono::milliseconds( 100 ) );
+
+			printProgress( heapifyLimit + pos );
+		}
+
+		printProgress( heapifyLimit + limit );
+	}
+
+	sorterThread->join();
+	delete sorterThread;
 
 	file.close();
 
 	if ( !quiet )
-		cout << "Done!" << endl;
+		cout << "\33[?25h\nSorting complete complete." << endl;
 }
 
 void sortStepOne( fstream* file, size_t heapifyLimit ) {
@@ -83,8 +96,76 @@ void sortStepOne( fstream* file, size_t heapifyLimit ) {
 	}
 }
 
-void sortStepTwo( std::fstream* file ) {
+void sortStepTwo( std::fstream* file, size_t numDataSets ) {
+	IndexEntry* last = new IndexEntry();
+	IndexEntry* top = new IndexEntry();
+	IndexEntry* left = new IndexEntry();
+	IndexEntry* right = new IndexEntry();
+	size_t posLast;
+	size_t posTop;
+	size_t posLeft;
+	size_t posRight;
+	bool swaped;
 
+	for ( pos = 0; pos < numDataSets; pos++ ) {
+		posLast = numDataSets - pos;
+		posTop = 0;
+
+		readData( file, last, posTop );
+		readData( file, top, posLast );
+		writeData( file, last, posLast );
+
+		do {
+			posLeft = getLeft( posTop );
+			posRight = getRight( posTop );
+
+			if ( isInHeap( posLeft ) ) {
+				readData( file, left, posLeft );
+
+				if ( isInHeap( posRight ) ) {
+					readData( file, right, posRight );
+
+					if ( right > left ) {
+						if ( right > top ) {
+							writeData( file, right, posTop );
+							posTop = posRight;
+
+							swaped = true;
+						} else {
+							swaped = false;
+						}
+					} else {
+						if ( left > top ) {
+							writeData( file, left, posTop );
+							posTop = posLeft;
+
+							swaped = true;
+						} else {
+							swaped = false;
+						}
+					}
+				} else {
+					if ( left > top ) {
+						writeData( file, left, posTop );
+						posTop = posLeft;
+
+						swaped = true;
+					} else {
+						swaped = false;
+					}
+				}
+			} else {
+				swaped = false;
+			}
+		} while ( swaped );
+
+		writeData( file, top, posTop );
+	}
+
+	delete last;
+	delete top;
+	delete left;
+	delete right;
 }
 
 void readData( fstream* file, IndexEntry* entry, size_t pos ) {

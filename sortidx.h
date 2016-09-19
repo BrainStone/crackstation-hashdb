@@ -27,7 +27,7 @@ constexpr size_t getRight( size_t i ) {
 void sortIDX( std::string idxFile, bool quiet );
 
 void sortStepOne( std::fstream* file, size_t heapifyLimit );
-void sortStepTwo( std::fstream* file );
+void sortStepTwo( std::fstream* file, size_t numDataSets );
 
 void readData( std::fstream* file, IndexEntry* entry, size_t pos );
 void writeData( std::fstream* file, IndexEntry* entry, size_t pos );
