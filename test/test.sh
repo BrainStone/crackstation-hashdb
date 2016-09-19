@@ -2,9 +2,9 @@
 
 set -e
 
-# Rebuild ./sortidx and ./checksort
+# Rebuild ./crackstation
 make clean
-make all
+make release
 
 hashTypes=( "md5" "sha1" "NTLM" "LM" "MySQL4.1+" "md5(md5)" "whirlpool" )
 
@@ -12,9 +12,7 @@ mkdir -p test-index-files
 
 for hash in "${hashTypes[@]}"; do
     echo "TESTING [$hash]..."
-    php createidx.php "$hash" "test/words.txt" "test-index-files/test-words-$hash.idx"
-    ./sortidx "test-index-files/test-words-$hash.idx"
-    ./checksort "test-index-files/test-words-$hash.idx"
+    ./crackstation -c -v "test/words.txt" "test-index-files/test-words-$hash.idx" "$hash"
     php test/test.php "$hash"
 done
 
