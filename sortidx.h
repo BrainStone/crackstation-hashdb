@@ -32,5 +32,6 @@ void sortStepTwo( std::fstream* file, size_t numDataSets );
 void readData( std::fstream* file, IndexEntry* entry, size_t pos );
 void writeData( std::fstream* file, IndexEntry* entry, size_t pos );
 bool isInHeap( size_t pos );
+void orderHeap( std::fstream* file, IndexEntry &top, size_t posTop );
 
 #endif
