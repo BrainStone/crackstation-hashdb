@@ -2,11 +2,13 @@
 
 set -e
 
-# Rebuild ./crackstation
-make clean
-make release
+# Rebuild ./crackstation if necessary
+if ! [ -x ./crackstation ]; then
+  make release
+fi
 
-hashTypes=( "md5" "sha1" "NTLM" "LM" "MySQL4.1+" "md5(md5)" "whirlpool" )
+#hashTypes=( "md5" "sha1" "sha512" "NTLM" "LM" "MySQL4.1+" "md5(md5)" "whirlpool" )
+hashTypes=( "sha512" "md5" "sha1" "NTLM" "LM" "MySQL4.1+" "md5(md5)" "whirlpool" )
 
 mkdir -p test-index-files
 
