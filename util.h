@@ -46,11 +46,16 @@ unsigned short getConsoleWidth();
 
 size_t getNumCores();
 
+// Determines which byte postfix to use (0 = "B", 1 = "KiB", ...)
 unsigned short getBytePower( std::streampos size );
+// Returns the appropriate byte postfix
 std::string getBytePowerPostfix( unsigned short power );
+// Formats the size. If power is -1 it automatically detects the power
 std::string getFormatedSize( std::streampos size, int power = -1 );
 
+// Initializes the progress bar
 void initProgress( std::streampos fileSize, bool withFileSize );
+// Prints the progressbar
 void printProgress( std::streampos currentPos );
 
 #endif

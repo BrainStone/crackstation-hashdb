@@ -10,9 +10,9 @@ fstream* file;
 size_t arraySize = 0;
 IndexEntry* cacheArray;
 
-void readIntoArray( size_t numElements ) {
+void readIntoCache( size_t numElements ) {
 	if ( arraySize != 0 )
-		writeFromArray();
+		writeFromCache();
 
 	arraySize = numElements;
 	cacheArray = new IndexEntry[arraySize];
@@ -23,7 +23,7 @@ void readIntoArray( size_t numElements ) {
 	}
 }
 
-void writeFromArray() {
+void writeFromCache() {
 	file->seekp( 0 );
 
 	for ( size_t i = 0; i < arraySize; i++ ) {
@@ -47,7 +47,7 @@ void sortIDX( string idxFile, size_t cacheSize, bool quiet ) {
 		cout << "Sorting index (may take a while)...\n\33[sLoading cache from file..." << flush;
 
 	cacheSize /= writeSize;
-	readIntoArray( min(cacheSize, numDataSets) );
+	readIntoCache( min(cacheSize, numDataSets) );
 
 	sorterThread = new thread( heapifyIDX, heapifyLimit );
 
@@ -82,7 +82,7 @@ void sortIDX( string idxFile, size_t cacheSize, bool quiet ) {
 	if ( !quiet )
 		cout << "\33[?25h\n\33[sSaving cache to file." << flush;
 
-	writeFromArray();
+	writeFromCache();
 
 	file->close();
 	delete file;
