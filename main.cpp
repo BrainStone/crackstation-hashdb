@@ -51,6 +51,6 @@ int main( int argc, char* argv[] ) {
 
 	if ( options[CREATE] ) {
 		createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), options[QUIET] );
-		sortIDX( parse.nonOption( 1 ), options[QUIET] );
+		sortIDX( parse.nonOption( 1 ), 1024 * 1024 * 1024, options[QUIET] );
 	}
 }

@@ -7,11 +7,23 @@ unsigned short formatPower;
 string fileSizeString;
 bool renderWithFileSize;
 
-bool operator>( const IndexEntry &rhs, const IndexEntry &lhs ) {
+IndexEntry& IndexEntry::operator=( const IndexEntry &copyFrom ) {
+	size_t i;
+
+	for ( i = 0; i < hashSize; i++ )
+		hash[i] = copyFrom.hash[i];
+
+	for ( i = 0; i < offsetSize; i++ )
+		position[i] = copyFrom.position[i];
+
+	return *this;
+}
+
+bool IndexEntry::operator>( const IndexEntry &lhs ) {
 	for ( size_t i = 0; i < hashSize; i++ ) {
-		if ( rhs.hash[i] > lhs.hash[i] )
+		if ( hash[i] > lhs.hash[i] )
 			return true;
-		else if ( rhs.hash[i] < lhs.hash[i] )
+		else if ( hash[i] < lhs.hash[i] )
 			return false;
 	}
 

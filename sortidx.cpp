@@ -7,11 +7,34 @@ size_t numDataSets;
 size_t limit;
 atomic<size_t> pos;
 fstream* file;
+size_t arraySize = 0;
+IndexEntry* cacheArray;
 
-void sortIDX( string idxFile, bool quiet ) {
-	if ( !quiet )
-		cout << "Sorting index (may take a while)..." << endl;
+void readIntoArray( size_t numElements ) {
+	if ( arraySize != 0 )
+		writeFromArray();
 
+	arraySize = numElements;
+	cacheArray = new IndexEntry[arraySize];
+	file->seekg( 0 );
+
+	for ( size_t i = 0; i < arraySize; i++ ) {
+		file->read( (char*)(cacheArray + i), writeSize );
+	}
+}
+
+void writeFromArray() {
+	file->seekp( 0 );
+
+	for ( size_t i = 0; i < arraySize; i++ ) {
+		file->write( (char*)(cacheArray + i), writeSize );
+	}
+
+	arraySize = 0;
+	delete[] cacheArray;
+}
+
+void sortIDX( string idxFile, size_t cacheSize, bool quiet ) {
 	file = new fstream( idxFile, ios::in | ios::out | ios::binary | ios::ate );
 	fileSize = file->tellg();
 	numDataSets = fileSize / writeSize;
@@ -20,9 +43,16 @@ void sortIDX( string idxFile, bool quiet ) {
 	const size_t heapifyLimit = getParent( limit );
 	thread* sorterThread;
 
+	if ( !quiet )
+		cout << "Sorting index (may take a while)...\n\33[sLoading cache from file..." << flush;
+
+	cacheSize /= writeSize;
+	readIntoArray( min(cacheSize, numDataSets) );
+
 	sorterThread = new thread( heapifyIDX, heapifyLimit );
 
 	if ( !quiet ) {
+		cout << "\33[u";
 		initProgress( heapifyLimit + localLimit, false );
 
 		while ( pos <= heapifyLimit ) {
@@ -49,11 +79,16 @@ void sortIDX( string idxFile, bool quiet ) {
 	sorterThread->join();
 	delete sorterThread;
 
+	if ( !quiet )
+		cout << "\33[?25h\n\33[sSaving cache to file." << flush;
+
+	writeFromArray();
+
 	file->close();
 	delete file;
 
 	if ( !quiet )
-		cout << "\33[?25h\nSorting complete complete." << endl;
+		cout << "\33[u\33[KDone!" << endl;
 }
 
 void heapifyIDX( size_t heapifyLimit ) {
@@ -89,13 +124,21 @@ void sortIDXHeap( size_t numDataSets ) {
 }
 
 void readData( IndexEntry* entry, size_t pos ) {
-	file->seekg( pos * writeSize );
-	file->read( (char*)entry, writeSize );
+	if ( pos < arraySize ) {
+		*entry = cacheArray[pos];
+	} else {
+		file->seekg( pos * writeSize );
+		file->read( (char*)entry, writeSize );
+	}
 }
 
 void writeData( IndexEntry* entry, size_t pos ) {
-	file->seekp( pos * writeSize );
-	file->write( (char*)entry, writeSize );
+	if ( pos < arraySize ) {
+		cacheArray[pos] = *entry;
+	} else {
+		file->seekp( pos * writeSize );
+		file->write( (char*)entry, writeSize );
+	}
 }
 
 bool isInHeap( size_t pos ) {

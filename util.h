@@ -25,11 +25,12 @@ typedef std::lock_guard<std::mutex> scoped_lock;
 struct IndexEntry {
 	unsigned char hash[hashSize]; // First 64 bits of the hash
 	unsigned char position[offsetSize]; // Position of word in dictionary (48-bit little endian integer)
+
+	IndexEntry& operator=( const IndexEntry &copyFrom );
+	bool operator>( const IndexEntry &lhs );
 } __attribute__( (__packed__) );
 
 // Functions
-bool operator>( const IndexEntry &rhs, const IndexEntry &lhs );
-
 /**
 * Gets the nth byte from a var. The 0th byte is the right most byte numerically speaking.
 * Or it gets the nth byte in little-endian.

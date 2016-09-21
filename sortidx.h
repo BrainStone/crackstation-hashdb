@@ -2,6 +2,7 @@
 #define CRACKSTATION_SORTIDX_H
 
 // Includes
+#include <algorithm>
 #include <atomic>
 #include <fstream>
 #include <iostream>
@@ -24,7 +25,10 @@ constexpr size_t getRight( size_t i ) {
 	return i * 2 + 2;
 }
 
-void sortIDX( std::string idxFile, bool quiet );
+void sortIDX( std::string idxFile, size_t cacheSize, bool quiet );
+
+void readIntoArray( size_t numElements );
+void writeFromArray();
 
 void heapifyIDX( size_t heapifyLimit );
 void sortIDXHeap( size_t numDataSets );

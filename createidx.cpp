@@ -70,7 +70,7 @@ void computeHashes( atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOu
 	string line;
 	streampos pos;
 	unsigned char hash512[SHA512_DIGEST_LENGTH];
-	unsigned char writeBuffer[writeSize];
+	IndexEntry writeBuffer;
 
 	while ( true ) {
 		{
@@ -86,17 +86,17 @@ void computeHashes( atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOu
 		SHA512( (const unsigned char*)line.c_str(), line.length(), hash512 );
 
 		for ( i = 0; i < hashSize; i++ ) {
-			writeBuffer[i] = hash512[i];
+			writeBuffer.hash[i] = hash512[i];
 		}
 
 		for ( i = 0; i < offsetSize; i++ ) {
-			writeBuffer[i + hashSize] = getNthByte( pos, i );
+			writeBuffer.position[i] = getNthByte( pos, i );
 		}
 
 		{
 			scoped_lock lock( *fileOutMutex );
 
-			fileOut->write( (const char*)writeBuffer, writeSize );
+			fileOut->write( (char*)&writeBuffer, writeSize );
 		}
 	}
 
