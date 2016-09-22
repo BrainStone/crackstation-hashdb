@@ -14,7 +14,7 @@
 #include "util.h"
 
 // Functions
-void createIDX( std::string wordlist, std::string idxFile, std::string hash, bool quiet );
+void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, bool quiet );
 void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut );
 
 #endif
