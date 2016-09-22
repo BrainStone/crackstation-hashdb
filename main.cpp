@@ -17,8 +17,8 @@ const option::Descriptor usage[] =
 	{ CREATE , 0, "c", "create", option::Arg::None, "  --create, -c   \tCreates the dictionary from the wordlist." },
 	{ VERIFY , 0, "v", "verify", option::Arg::None, "  --verify, -v   \tVerifies that the dictionary is sorted." },
 	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  --quiet,  -q   \tDisables most output. Usefull for automated scripts." },
-	{ CORES  , 0, "C", "cores" , option::ArgStatus::},
-	{},
+	{ CORES  , 0, "C", "cores" , option::Arg::Optional, "  --cores,  -C   \tHow many cores to use when computing the hashes. (Only used when -c)." },
+	{ RAM    , 0, "r", "ram"   , option::Arg::Optional, "  --ram,    -r   \tHow much RAM to use when sorting the index file. (Only used when -c)." },
 	{ UNKNOWN, 0, "" ,  ""     , option::Arg::None, "\nExamples:\n"
 													"  crackstation -c words.txt words-sha512.idx sha512\n"
 													"  crackstation words.txt words-md5.idx md5 827ccb0eea8a706c4c34a16891f84e7b\n" },
