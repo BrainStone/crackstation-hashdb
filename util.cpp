@@ -1,7 +1,5 @@
 #include "util.h"
 
-using namespace std;
-
 streampos totalFileSize;
 unsigned short formatPower;
 string fileSizeString;
@@ -23,7 +21,7 @@ unsigned short getConsoleWidth() {
 }
 
 size_t getNumCores() {
-	size_t out = thread::hardware_concurrency();
+	size_t out = std::thread::hardware_concurrency();
 
 	if ( out == 0 )
 		return 1;
@@ -31,7 +29,7 @@ size_t getNumCores() {
 		return out;
 }
 
-unsigned short getBytePower( streampos size ) {
+unsigned short getBytePower( std::streampos size ) {
 	unsigned short power;
 
 	for ( power = 0; size >= 1000; power++ )
@@ -40,12 +38,12 @@ unsigned short getBytePower( streampos size ) {
 	return power;
 }
 
-string getBytePowerPostfix( unsigned short power ) {
-	static const string postfixes[] = { "  B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" };
-	static constexpr size_t numPostfixes = sizeof( postfixes ) / sizeof( string );
+std::string getBytePowerPostfix( unsigned short power ) {
+	static const std::string postfixes[] = { "  B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" };
+	static constexpr size_t numPostfixes = sizeof( postfixes ) / sizeof( std::string );
 
 	if ( power > numPostfixes ) {
-		return string( "2^" ) + to_string( power * 10 ) + postfixes[0];
+		return std::string( "2^" ) + std::to_string( power * 10 ) + postfixes[0];
 	} else {
 		return postfixes[power];
 	}
@@ -54,12 +52,12 @@ string getBytePowerPostfix( unsigned short power ) {
 std::string getFormatedSize( std::streampos size, int power ) {
 	unsigned short formatPower = (power <= -1) ? getBytePower( size ) : (unsigned short)power;
 
-	stringstream ss;
+	std::stringstream ss;
 
 	if ( power == 0 ) {
-		ss << setw( 3 ) << size << "    ";
+		ss << std::setw( 3 ) << size << "    ";
 	} else {
-		ss << setw( 7 ) << fixed << setprecision( 3 ) << double( size ) / double( 1 << (10 * power) );
+		ss << std::setw( 7 ) << std::fixed << std::setprecision( 3 ) << double( size ) / double( 1 << (10 * power) );
 	}
 
 	ss << ' ' << getBytePowerPostfix( formatPower );
@@ -67,31 +65,31 @@ std::string getFormatedSize( std::streampos size, int power ) {
 	return ss.str();
 }
 
-void initProgress( streampos fileSize, bool withFileSize ) {
+void initProgress( std::streampos fileSize, bool withFileSize ) {
 	totalFileSize = fileSize;
 	formatPower = getBytePower( fileSize );
 	fileSizeString = getFormatedSize( fileSize, formatPower );
 	renderWithFileSize = withFileSize;
 
-	cout << "\33[?25l";
+	std::cout << "\33[?25l";
 }
 
-void printProgress( streampos currentPos ) {
+void printProgress( std::streampos currentPos ) {
 	int barWidth = getConsoleWidth() - (renderWithFileSize ? 35 : 9);
 	double progress = (double)currentPos / totalFileSize;
 
-	cout << "\33[s\33[K[";
+	std::cout << "\33[s\33[K[";
 	int pos = barWidth * progress;
 	for ( int i = 0; i < barWidth; ++i ) {
-		if ( i < pos ) cout << '=';
-		else if ( i == pos ) cout << '>';
-		else cout << ' ';
+		if ( i < pos ) std::cout << '=';
+		else if ( i == pos ) std::cout << '>';
+		else std::cout << ' ';
 	}
 
-	cout << "] " << setw( 5 ) << fixed << setprecision( 1 ) << progress * 100.0 << '%';
+	std::cout << "] " << std::setw( 5 ) << std::fixed << std::setprecision( 1 ) << progress * 100.0 << '%';
 
 	if ( renderWithFileSize )
-		cout << ' ' << getFormatedSize( currentPos, formatPower ) << " / " << fileSizeString;
+		std::cout << ' ' << getFormatedSize( currentPos, formatPower ) << " / " << fileSizeString;
 
-	cout << "\33[u" << flush;
+	std::cout << "\33[u" << std::flush;
 }

@@ -1,9 +1,5 @@
 #include "main.h"
 
-#include "optionparser.h"
-
-using namespace std;
-
 enum  optionIndex {
 	UNKNOWN, HELP, CREATE, VERIFY, QUIET
 };
@@ -40,17 +36,22 @@ int main( int argc, char* argv[] ) {
 		(options[CREATE] && (parse.nonOptionsCount() != 3)) ||
 		 (!options[CREATE] && options[VERIFY] && (parse.nonOptionsCount() != 1)) ||
 		 (!options[CREATE] && !options[VERIFY] && (parse.nonOptionsCount() <= 3)) ) {
-		option::printUsage( cerr, usage );
+		option::printUsage( std::cerr, usage );
 
 		return 0;
 	}
 
 	if ( !options[QUIET] )
 		for ( option::Option* opt = options[UNKNOWN]; opt; opt = opt->next() )
-			cout << "Unknown option: " << opt->name << "\n";
+			std::cout << "Unknown option: " << opt->name << "\n";
 
 	if ( options[CREATE] ) {
 		createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), options[QUIET] );
-		sortIDX( parse.nonOption( 1 ), 1024 * 1024 * 1024, options[QUIET] );
+		//sortIDX( parse.nonOption( 1 ), 1024 * 1024 * 1024, options[QUIET] );
+	}
+
+	if ( options[VERIFY] ) {
+		// Just for testing....
+		sortIDX( parse.nonOption( 0 + (bool)options[CREATE] ), 1024 * 1024 * 1024, options[QUIET] );
 	}
 }

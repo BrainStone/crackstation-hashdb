@@ -6,6 +6,7 @@
 #include <string>
 
 #include "createidx.h"
+#include "optionparser.h"
 #include "sortidx.h"
 #include "util.h"
 
