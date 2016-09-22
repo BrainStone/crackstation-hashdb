@@ -10,6 +10,7 @@
 
 #include <openssl/sha.h>
 
+#include "filearray.h"
 #include "util.h"
 
 // Functions

@@ -1,94 +1,57 @@
 #include "sortidx.h"
 
-using namespace std;
+std::atomic<size_t> limit;
+std::atomic<size_t> pos;
+FileArray* fileArray;
 
-streampos fileSize;
-size_t numDataSets;
-size_t limit;
-atomic<size_t> pos;
-fstream* file;
-size_t arraySize = 0;
-IndexEntry* cacheArray;
-
-void readIntoCache( size_t numElements ) {
-	if ( arraySize != 0 )
-		writeFromCache();
-
-	arraySize = numElements;
-	cacheArray = new IndexEntry[arraySize];
-	file->seekg( 0 );
-
-	for ( size_t i = 0; i < arraySize; i++ ) {
-		file->read( (char*)(cacheArray + i), writeSize );
-	}
-}
-
-void writeFromCache() {
-	file->seekp( 0 );
-
-	for ( size_t i = 0; i < arraySize; i++ ) {
-		file->write( (char*)(cacheArray + i), writeSize );
-	}
-
-	arraySize = 0;
-	delete[] cacheArray;
-}
-
-void sortIDX( string idxFile, size_t cacheSize, bool quiet ) {
-	file = new fstream( idxFile, ios::in | ios::out | ios::binary | ios::ate );
-	fileSize = file->tellg();
-	numDataSets = fileSize / writeSize;
-	limit = numDataSets - 1;
-	const size_t localLimit = limit;
-	const size_t heapifyLimit = getParent( limit );
-	thread* sorterThread;
-
+void sortIDX( const std::string & idxFile, size_t cacheSize, bool quiet ) {
 	if ( !quiet )
-		cout << "Sorting index (may take a while)...\n\33[sLoading cache from file..." << flush;
+		std::cout << "Sorting index (may take a while)...\n\33[sLoading cache from file..." << std::flush;
 
-	cacheSize /= writeSize;
-	readIntoCache( min(cacheSize, numDataSets) );
+	{
+		// Scoping for early destruction of objects
+		FileArray fileArray( idxFile, cacheSize );
+		const size_t localLimit = fileArray.getSize() - 1;
+		limit = localLimit;
+		const size_t heapifyLimit = getParent( localLimit );
+		std::thread sorterThread;
 
-	sorterThread = new thread( heapifyIDX, heapifyLimit );
+		sorterThread = std::thread( heapifyIDX, heapifyLimit );
 
-	if ( !quiet ) {
-		cout << "\33[u";
-		initProgress( heapifyLimit + localLimit, false );
+		if ( !quiet ) {
+			std::cout << "\33[u";
+			initProgress( heapifyLimit + localLimit, false );
 
-		while ( pos <= heapifyLimit ) {
-			this_thread::sleep_for( chrono::milliseconds( defaultTimeout ) );
+			while ( pos <= heapifyLimit ) {
+				std::this_thread::sleep_for( std::chrono::milliseconds( defaultTimeout ) );
 
-			printProgress( (size_t)pos );
+				printProgress( (size_t)pos );
+			}
 		}
-	}
 
-	sorterThread->join();
-	delete sorterThread;
+		sorterThread.join();
 
-	pos = 0;
-	sorterThread = new thread( sortIDXHeap, localLimit );
+		pos = 0;
+		sorterThread = std::thread( sortIDXHeap, localLimit );
 
-	if ( !quiet ) {
-		while ( pos < localLimit ) {
-			this_thread::sleep_for( chrono::milliseconds( defaultTimeout ) );
+		if ( !quiet ) {
+			while ( pos < localLimit ) {
+				std::this_thread::sleep_for( std::chrono::milliseconds( defaultTimeout ) );
 
-			printProgress( heapifyLimit + pos );
+				printProgress( heapifyLimit + pos );
+			}
 		}
+
+		sorterThread.join();
+
+		if ( !quiet )
+			std::cout << "\33[?25h\n\33[sSaving cache to file." << std::flush;
+
+		// Close the FileArray through RAII
 	}
 
-	sorterThread->join();
-	delete sorterThread;
-
 	if ( !quiet )
-		cout << "\33[?25h\n\33[sSaving cache to file." << flush;
-
-	writeFromCache();
-
-	file->close();
-	delete file;
-
-	if ( !quiet )
-		cout << "\33[u\33[KDone!" << endl;
+		std::cout << "\33[u\33[KDone!" << std::endl;
 }
 
 void heapifyIDX( size_t heapifyLimit ) {
@@ -98,7 +61,7 @@ void heapifyIDX( size_t heapifyLimit ) {
 	for ( pos = 0; pos <= heapifyLimit; pos++ ) {
 		posTop = heapifyLimit - pos;
 
-		readData( &top, posTop );
+		fileArray->readEntry( top, posTop );
 
 		orderHeap( top, posTop );
 	}
@@ -115,29 +78,11 @@ void sortIDXHeap( size_t numDataSets ) {
 		posTop = 0;
 		limit = posLast - 1;
 
-		readData( &last, posTop );
-		readData( &top, posLast );
-		writeData( &last, posLast );
+		fileArray->readEntry( last, posTop );
+		fileArray->readEntry( top, posLast );
+		fileArray->writeEntry( last, posLast );
 
 		orderHeap( top, posTop );
-	}
-}
-
-void readData( IndexEntry* entry, size_t pos ) {
-	if ( pos < arraySize ) {
-		*entry = cacheArray[pos];
-	} else {
-		file->seekg( pos * writeSize );
-		file->read( (char*)entry, writeSize );
-	}
-}
-
-void writeData( IndexEntry* entry, size_t pos ) {
-	if ( pos < arraySize ) {
-		cacheArray[pos] = *entry;
-	} else {
-		file->seekp( pos * writeSize );
-		file->write( (char*)entry, writeSize );
 	}
 }
 
@@ -157,14 +102,14 @@ void orderHeap( IndexEntry &top, size_t posTop ) {
 		posRight = getRight( posTop );
 
 		if ( isInHeap( posLeft ) ) {
-			readData( &left, posLeft );
+			fileArray->readEntry( left, posLeft );
 
 			if ( isInHeap( posRight ) ) {
-				readData( &right, posRight );
+				fileArray->readEntry( right, posRight );
 
-				if ( right > left ) {
-					if ( right > top ) {
-						writeData( &right, posTop );
+				if ( left < right ) {
+					if ( top < right ) {
+						fileArray->writeEntry( right, posTop );
 						posTop = posRight;
 
 						swapped = true;
@@ -172,8 +117,8 @@ void orderHeap( IndexEntry &top, size_t posTop ) {
 						swapped = false;
 					}
 				} else {
-					if ( left > top ) {
-						writeData( &left, posTop );
+					if ( top < left ) {
+						fileArray->writeEntry( left, posTop );
 						posTop = posLeft;
 
 						swapped = true;
@@ -182,8 +127,8 @@ void orderHeap( IndexEntry &top, size_t posTop ) {
 					}
 				}
 			} else {
-				if ( left > top ) {
-					writeData( &left, posTop );
+				if ( top < left ) {
+					fileArray->writeEntry( left, posTop );
 					posTop = posLeft;
 
 					swapped = true;
@@ -196,5 +141,5 @@ void orderHeap( IndexEntry &top, size_t posTop ) {
 		}
 	} while ( swapped );
 
-	writeData( &top, posTop );
+	fileArray->writeEntry( top, posTop );
 }

@@ -90,13 +90,13 @@ void computeHashes( atomic<bool>* threadReady, mutex* fileInMutex, mutex* fileOu
 		}
 
 		for ( i = 0; i < offsetSize; i++ ) {
-			writeBuffer.position[i] = getNthByte( pos, i );
+			writeBuffer.offset[i] = getNthByte( pos, i );
 		}
 
 		{
 			scoped_lock lock( *fileOutMutex );
 
-			fileOut->write( (char*)&writeBuffer, writeSize );
+			fileOut->write( (char*)&writeBuffer, indexSize );
 		}
 	}
 
