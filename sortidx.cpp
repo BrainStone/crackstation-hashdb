@@ -10,12 +10,13 @@ void sortIDX( const std::string & idxFile, size_t cacheSize, bool quiet ) {
 
 	{
 		// Scoping for early destruction of objects
-		FileArray fileArray( idxFile, cacheSize );
-		const size_t localLimit = fileArray.getSize() - 1;
+		FileArray localFileArray( idxFile, cacheSize );
+		const size_t localLimit = localFileArray.getSize() - 1;
 		limit = localLimit;
 		const size_t heapifyLimit = getParent( localLimit );
 		std::thread sorterThread;
 
+		fileArray = &localFileArray;
 		sorterThread = std::thread( heapifyIDX, heapifyLimit );
 
 		if ( !quiet ) {
