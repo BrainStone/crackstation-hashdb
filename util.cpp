@@ -1,8 +1,8 @@
 #include "util.h"
 
-streampos totalFileSize;
+std::streampos totalFileSize;
 unsigned short formatPower;
-string fileSizeString;
+std::string fileSizeString;
 bool renderWithFileSize;
 
 struct winsize getConsoleSize() {
