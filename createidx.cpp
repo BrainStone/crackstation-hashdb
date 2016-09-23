@@ -9,8 +9,8 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 
 	const size_t numThreads = (cores == -1) ? getNumCores() : cores;
 
-	std::vector<std::thread> threads(numThreads);
-	std::vector<std::atomic<bool>> threadReady(numThreads);
+	std::vector<std::thread> threads( numThreads );
+	std::vector<std::atomic<bool>> threadReady( numThreads );
 	std::mutex fileInMutex;
 	std::mutex fileOutMutex;
 	std::ifstream fileIn( wordlist, std::ios::in | std::ios::ate );
