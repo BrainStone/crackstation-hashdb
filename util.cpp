@@ -110,6 +110,8 @@ option::ArgStatus Arg::Long( const option::Option& option, bool msg ) {
 option::ArgStatus Arg::ULong( const option::Option& option, bool msg ) {
 	try {
 		std::stoul( option.arg );
+
+		return option::ARG_OK;
 	} catch ( const std::exception & ) {
 		if ( msg )
 			std::cerr << "Option '" << option.name << "' requires a numeric argument\n" << std::endl;
