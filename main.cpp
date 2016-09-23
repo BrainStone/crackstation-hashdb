@@ -45,7 +45,7 @@ int main( int argc, char* argv[] ) {
 
 	const bool quiet = options[QUIET];
 	const long cores = (options[CORES]) ? std::stol( options[CORES].arg ) : -1;
-	const size_t ram = ((options[RAM]) ? std::stoul( options[RAM].arg ) : 256) * MB;
+	const size_t ram = ((options[RAM]) ? std::stoul( options[RAM].arg ) : defaultRam) * MB;
 
 	if ( !quiet )
 		for ( option::Option* opt = options[UNKNOWN]; opt; opt = opt->next() )
