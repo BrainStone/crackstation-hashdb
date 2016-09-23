@@ -7,7 +7,7 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 	size_t i;
 	bool runLoop = true;
 
-	const size_t numThreads = (cores == -1) ? getNumCores() : cores;
+	const size_t numThreads = (cores <= 0) ? getNumCores() : cores;
 
 	std::vector<std::thread> threads( numThreads );
 	std::vector<std::atomic<bool>> threadReady( numThreads );

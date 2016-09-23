@@ -28,7 +28,7 @@ constexpr size_t getRight( size_t i ) {
 }
 
 // Sorts an idx file. Using chachSize bytes of RAM to speed it up.
-void sortIDX( const std::string & idxFile, size_t cacheSize, bool quiet );
+void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet );
 
 // Turns the idx file into a heap (first step of heapsort)
 void heapifyIDX( size_t heapifyLimit );

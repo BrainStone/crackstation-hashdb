@@ -4,13 +4,13 @@ std::atomic<size_t> limit;
 std::atomic<size_t> pos;
 FileArray* fileArray;
 
-void sortIDX( const std::string & idxFile, size_t cacheSize, bool quiet ) {
+void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet ) {
 	if ( !quiet )
 		std::cout << "Sorting index (may take a while)...\n\33[sLoading cache from file..." << std::flush;
 
 	{
 		// Scoping for early destruction of objects
-		FileArray localFileArray( idxFile, cacheSize );
+		FileArray localFileArray( idxFile, cacheByteSize / indexSize );
 		const size_t localLimit = localFileArray.getSize() - 1;
 		limit = localLimit;
 		const size_t heapifyLimit = getParent( localLimit );
