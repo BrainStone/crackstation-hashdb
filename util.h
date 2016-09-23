@@ -2,6 +2,7 @@
 #define CRACKSTATION_UTIL_H
 
 // Includes
+#include <exception>
 #include <iomanip>
 #include <iostream>
 #include <mutex>
@@ -13,7 +14,10 @@
 
 #include <sys/ioctl.h>
 
+#include "optionparser.h"
+
 // Constants
+constexpr size_t MB = 1024 * 1024;
 constexpr long long defaultTimeout = 100;
 
 // Typedefs & Structs
@@ -46,5 +50,10 @@ std::string getFormatedSize( std::streampos size, int power = -1 );
 void initProgress( std::streampos fileSize, bool withFileSize );
 // Prints the progressbar
 void printProgress( std::streampos currentPos );
+
+struct Arg : public option::Arg {
+	static option::ArgStatus Long( const option::Option& option, bool msg );
+	static option::ArgStatus ULong( const option::Option& option, bool msg );
+};
 
 #endif

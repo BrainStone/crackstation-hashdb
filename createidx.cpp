@@ -1,16 +1,16 @@
 #include "createidx.h"
 
-void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, bool quiet ) {
+void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, long cores, bool quiet ) {
 	if ( !quiet )
 		std::cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hash << " hash..." << std::endl;
 
 	size_t i;
 	bool runLoop = true;
 
-	const size_t numThreads = getNumCores();
+	const size_t numThreads = (cores == -1) ? getNumCores() : cores;
 
-	std::thread threads[numThreads];
-	std::atomic<bool> threadReady[numThreads];
+	std::vector<std::thread> threads(numThreads);
+	std::vector<std::atomic<bool>> threadReady(numThreads);
 	std::mutex fileInMutex;
 	std::mutex fileOutMutex;
 	std::ifstream fileIn( wordlist, std::ios::in | std::ios::ate );

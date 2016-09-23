@@ -32,6 +32,12 @@ FileArray::FileArray( const std::string & fileName, size_t cacheSize ) :
 	size( fileSize / indexSize ),
 	cacheSize( std::min( cacheSize, size ) ),
 	cache( this->cacheSize ) {
+	if ( (indexSize * size) != fileSize ) {
+		throw std::invalid_argument(
+			"The file size needs to be divisible by " + std::to_string( indexSize ) + "!\n" +
+			"File size of \"" + fileName + "\" is " + std::to_string( fileSize ) + "!" );
+	}
+
 	loadCacheFromFile();
 }
 

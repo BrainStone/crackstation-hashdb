@@ -93,3 +93,29 @@ void printProgress( std::streampos currentPos ) {
 
 	std::cout << "\33[u" << std::flush;
 }
+
+struct Arg : public option::Arg {
+	static option::ArgStatus Long( const option::Option& option, bool msg ) {
+		try {
+			std::stol( option.arg );
+
+			return option::ARG_OK;
+		} catch ( const std::exception & ) {
+			if ( msg )
+				std::cerr << "Option '" << option.name << "' requires a numeric argument\n" << std::endl;
+
+			return option::ARG_ILLEGAL;
+		}
+	}
+
+	static option::ArgStatus ULong( const option::Option& option, bool msg ) {
+		try {
+			std::stoul( option.arg );
+		} catch ( const std::exception & ) {
+			if ( msg )
+				std::cerr << "Option '" << option.name << "' requires a numeric argument\n" << std::endl;
+
+			return option::ARG_ILLEGAL;
+		}
+	}
+};
