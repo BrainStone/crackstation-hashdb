@@ -10,7 +10,7 @@ void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet ) {
 
 	{
 		// Scoping for early destruction of objects
-		FileArray localFileArray( idxFile, cacheByteSize / indexSize );
+		FileArray localFileArray( idxFile, cacheByteSize / FileArray::IndexEntry::indexSize );
 		const size_t localLimit = localFileArray.getSize() - 1;
 		limit = localLimit;
 		const size_t heapifyLimit = getParent( localLimit );
@@ -56,7 +56,7 @@ void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet ) {
 }
 
 void heapifyIDX( size_t heapifyLimit ) {
-	IndexEntry top;
+	FileArray::IndexEntry top;
 	size_t posTop;
 
 	for ( pos = 0; pos <= heapifyLimit; pos++ ) {
@@ -69,8 +69,8 @@ void heapifyIDX( size_t heapifyLimit ) {
 }
 
 void sortIDXHeap( size_t numDataSets ) {
-	IndexEntry last;
-	IndexEntry top;
+	FileArray::IndexEntry last;
+	FileArray::IndexEntry top;
 	size_t posLast;
 	size_t posTop;
 
@@ -91,9 +91,9 @@ bool isInHeap( size_t pos ) {
 	return pos <= limit;
 }
 
-void orderHeap( IndexEntry &top, size_t posTop ) {
-	static IndexEntry left;
-	static IndexEntry right;
+void orderHeap( FileArray::IndexEntry &top, size_t posTop ) {
+	static FileArray::IndexEntry left;
+	static FileArray::IndexEntry right;
 	static size_t posLeft;
 	static size_t posRight;
 	static bool swapped;

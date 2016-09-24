@@ -38,6 +38,6 @@ void sortIDXHeap( size_t numDataSets );
 // Checks whether a index is in the heap
 bool isInHeap( size_t pos );
 // Moves a element down the heap until it is at the right position
-void orderHeap( IndexEntry &top, size_t posTop );
+void orderHeap( FileArray::IndexEntry &top, size_t posTop );
 
 #endif

@@ -9,7 +9,7 @@ const option::Descriptor usage[] =
 													"  Create dictionary:\n"
 													"    crackstation -c [-v] [-q] <wordlist> <dictionary> <hashtype>\n\n"
 													"  Find hash in dictionary:\n"
-													"    crackstation [-q] <wordlist> <dictionary> <hashtype> [hashes...]\n\n"
+													"    crackstation [-q] <wordlist> <dictionary> <hashtype> <hashes>...\n\n"
 													"  Verify dictionary:\n"
 													"    crackstation -v [-q] <dictionary>\n\n\n"
 													"Options:" },

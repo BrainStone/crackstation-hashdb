@@ -68,7 +68,7 @@ void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std
 	std::string line;
 	std::streampos pos;
 	unsigned char hash512[SHA512_DIGEST_LENGTH];
-	IndexEntry writeBuffer;
+	FileArray::IndexEntry writeBuffer;
 
 	while ( true ) {
 		{
@@ -83,18 +83,18 @@ void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std
 
 		SHA512( (const unsigned char*)line.c_str(), line.length(), hash512 );
 
-		for ( i = 0; i < hashSize; i++ ) {
+		for ( i = 0; i < FileArray::IndexEntry::hashSize; i++ ) {
 			writeBuffer.hash[i] = hash512[i];
 		}
 
-		for ( i = 0; i < offsetSize; i++ ) {
+		for ( i = 0; i < FileArray::IndexEntry::offsetSize; i++ ) {
 			writeBuffer.offset[i] = getNthByte( pos, i );
 		}
 
 		{
 			scoped_lock lock( *fileOutMutex );
 
-			fileOut->write( (char*)&writeBuffer, indexSize );
+			fileOut->write( (char*)&writeBuffer, FileArray::IndexEntry::indexSize );
 		}
 	}
 
