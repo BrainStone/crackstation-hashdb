@@ -3,7 +3,7 @@
 FileArray::FileArray( const std::string & fileName ) :
 	FileArray( fileName, 0 ) {}
 
-FileArray::FileArray( const std::string & fileName, size_t cacheSize ) :
+FileArray::FileArray( const std::string & fileName, FileArray::posType cacheSize ) :
 	file( fileName, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate ),
 	fileSize( file.tellg() ),
 	size( fileSize / FileArray::IndexEntry::indexSize ),
@@ -22,19 +22,19 @@ FileArray::~FileArray() {
 	writeCacheToFile();
 }
 
-size_t FileArray::getFileSize() const {
+FileArray::posType FileArray::getFileSize() const {
 	return fileSize;
 }
 
-size_t FileArray::getSize() const {
+FileArray::posType FileArray::getSize() const {
 	return size;
 }
 
-size_t FileArray::getCacheSize() const {
+FileArray::posType FileArray::getCacheSize() const {
 	return cacheSize;
 }
 
-void FileArray::readEntry( IndexEntry & entry, size_t index ) {
+void FileArray::readEntry( IndexEntry & entry, FileArray::posType index ) {
 	if ( index < cacheSize ) {
 		entry = cache[index];
 	} else {
@@ -43,7 +43,7 @@ void FileArray::readEntry( IndexEntry & entry, size_t index ) {
 	}
 }
 
-void FileArray::writeEntry( const IndexEntry & entry, size_t index ) {
+void FileArray::writeEntry( const IndexEntry & entry, FileArray::posType index ) {
 	if ( index < cacheSize ) {
 		cache[index] = entry;
 	} else {
@@ -69,7 +69,7 @@ void FileArray::writeCacheToFile() {
 }
 
 FileArray::IndexEntry& FileArray::IndexEntry::operator=( const FileArray::IndexEntry &copyFrom ) {
-	size_t i;
+	FileArray::posType i;
 
 	for ( i = 0; i < hashSize; i++ )
 		hash[i] = copyFrom.hash[i];
@@ -81,7 +81,7 @@ FileArray::IndexEntry& FileArray::IndexEntry::operator=( const FileArray::IndexE
 }
 
 bool FileArray::IndexEntry::operator==( const FileArray::IndexEntry & lhs ) const {
-	for ( size_t i = 0; i < hashSize; i++ ) {
+	for ( FileArray::posType i = 0; i < hashSize; i++ ) {
 		if ( hash[i] != lhs.hash[i] )
 			return false;
 	}
@@ -94,7 +94,7 @@ bool FileArray::IndexEntry::operator!=( const FileArray::IndexEntry & lhs ) cons
 }
 
 bool FileArray::IndexEntry::operator<( const FileArray::IndexEntry &lhs ) const {
-	for ( size_t i = 0; i < hashSize; i++ ) {
+	for ( FileArray::posType i = 0; i < hashSize; i++ ) {
 		if ( hash[i] < lhs.hash[i] )
 			return true;
 		else if ( hash[i] > lhs.hash[i] )
