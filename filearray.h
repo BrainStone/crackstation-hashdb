@@ -25,8 +25,8 @@ public:
 	void readEntry( IndexEntry &entry, posType index );
 	void writeEntry( const IndexEntry &entry, posType index );
 
-	Iterator & begin();
-	Iterator & end();
+	Iterator begin();
+	Iterator end();
 
 private:
 	FileArray() = delete;
@@ -50,7 +50,7 @@ struct FileArray::IndexEntry {
 	unsigned char hash[hashSize]; // First 64 bits of the hash
 	unsigned char offset[offsetSize]; // Position of word in dictionary (48-bit little endian integer)
 
-	FileArray::IndexEntry& operator=( const IndexEntry &copyFrom );
+	IndexEntry& operator=( const IndexEntry & copy );
 
 	bool operator==( const IndexEntry &lhs ) const;
 	bool operator!=( const IndexEntry &lhs ) const;
@@ -61,11 +61,45 @@ struct FileArray::IndexEntry {
 } __attribute__( (__packed__) );
 
 class FileArray::Iterator : public std::iterator<std::random_access_iterator_tag, IndexEntry, long int> {
+	friend class FileArray;
+
 public:
+	Iterator();
+	Iterator( const Iterator & copyFrom );
+	~Iterator();
+
+	Iterator& operator=( const Iterator & copy );
+	Iterator& operator+=( difference_type diff );
+	Iterator& operator-=( difference_type diff );
+	reference operator*();
+	pointer operator->();
+	reference operator[]( difference_type pos ) const;
+
+	Iterator& operator++();
+	Iterator& operator--();
+	Iterator operator++( int );
+	Iterator operator--( int );
+	difference_type operator-( const Iterator& rhs ) const;
+	Iterator operator+( difference_type rhs ) const;
+	Iterator operator-( difference_type rhs ) const;
+	friend Iterator operator+( difference_type lhs, const Iterator& rhs );
+
+	bool operator==( const Iterator &lhs ) const;
+	bool operator!=( const Iterator &lhs ) const;
+	bool operator< ( const Iterator &lhs ) const;
+	bool operator> ( const Iterator &lhs ) const;
+	bool operator<=( const Iterator &lhs ) const;
+	bool operator>=( const Iterator &lhs ) const;
 
 private:
 	posType position;
+	FileArray * fileArray;
 	value_type value;
+
+	Iterator( FileArray & fileArray, posType position );
+
+	void readValue();
+	void writeValue();
 };
 
 #endif
