@@ -1,9 +1,6 @@
 #include "createidx.h"
 
 void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, size_t cores, bool quiet ) {
-	if ( !quiet )
-		std::cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hash << " hash..." << std::endl;
-
 	size_t i;
 	bool runLoop = true;
 
@@ -18,7 +15,14 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 	const std::streampos fileSize = fileIn.tellg();
 	std::streampos pos;
 
+	if ( !fileIn.good() ) {
+		throw std::invalid_argument( "File \"" + wordlist + "\" does not exist!" );
+	}
+
 	fileIn.seekg( 0 );
+
+	if ( !quiet )
+		std::cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hash << " hash..." << std::endl;
 
 	for ( i = 0; i < numThreads; i++ ) {
 		threadReady[i] = false;

@@ -9,7 +9,9 @@ FileArray::FileArray( const std::string & fileName, FileArray::posType cacheSize
 	size( fileSize / FileArray::IndexEntry::indexSize ),
 	cacheSize( std::min( cacheSize, size ) ),
 	cache( this->cacheSize ) {
-	if ( (FileArray::IndexEntry::indexSize * size) != fileSize ) {
+	if ( !file.good() ) {
+		throw std::invalid_argument( "File \"" + fileName + "\" does not exist!" );
+	} else if ( (FileArray::IndexEntry::indexSize * size) != fileSize ) {
 		throw std::invalid_argument(
 			"The file size needs to be divisible by " + std::to_string( FileArray::IndexEntry::indexSize ) + "!\n" +
 			"File size of \"" + fileName + "\" is " + std::to_string( fileSize ) + "!" );
@@ -46,7 +48,7 @@ void FileArray::readEntry( IndexEntry & entry, FileArray::posType index ) {
 void FileArray::writeEntry( const IndexEntry & entry, FileArray::posType index ) {
 	if ( index < cacheSize ) {
 		cache[index] = entry;
-	} else if(index < size) {
+	} else if ( index < size ) {
 		file.seekp( FileArray::IndexEntry::indexSize * index );
 		file.write( reinterpret_cast<const char*>(&entry), FileArray::IndexEntry::indexSize );
 	}
