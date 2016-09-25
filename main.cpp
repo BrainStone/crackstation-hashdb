@@ -17,7 +17,7 @@ const option::Descriptor usage[] =
 	{ CREATE , 0, "c", "create", option::Arg::None, "  --create, -c   \tCreates the dictionary from the wordlist." },
 	{ VERIFY , 0, "v", "verify", option::Arg::None, "  --verify, -v   \tVerifies that the dictionary is sorted." },
 	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  --quiet,  -q   \tDisables most output. Usefull for automated scripts.\n" },
-	{ CORES  , 0, "C", "cores" , Arg::Long        , "  --cores,  -C   \tHow many cores to use when computing the hashes. (Only used when -c is set)." },
+	{ CORES  , 0, "C", "cores" , Arg::ULong       , "  --cores,  -C   \tHow many cores to use when computing the hashes. (Only used when -c is set)." },
 	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  --ram,    -r   \tHow much RAM (MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
 	{ UNKNOWN, 0, "" ,  ""     , option::Arg::None, "\nExamples:\n"
 													"  crackstation -c words.txt words-sha512.idx sha512\n"
@@ -44,7 +44,7 @@ int main( int argc, char* argv[] ) {
 	}
 
 	const bool quiet = options[QUIET];
-	const long cores = (options[CORES]) ? std::stol( options[CORES].arg ) : -1;
+	const size_t cores = (options[CORES]) ? std::stoul( options[CORES].arg ) : 0;
 	const size_t ram = ((options[RAM]) ? std::stoul( options[RAM].arg ) : defaultRam) * MB;
 
 	if ( !quiet )

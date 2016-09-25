@@ -1,13 +1,13 @@
 #include "createidx.h"
 
-void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, long cores, bool quiet ) {
+void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, size_t cores, bool quiet ) {
 	if ( !quiet )
 		std::cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hash << " hash..." << std::endl;
 
 	size_t i;
 	bool runLoop = true;
 
-	const size_t numThreads = (cores <= 0) ? getNumCores() : cores;
+	const size_t numThreads = (cores == 0) ? getNumCores() : cores;
 
 	std::vector<std::thread> threads( numThreads );
 	std::vector<std::atomic<bool>> threadReady( numThreads );
