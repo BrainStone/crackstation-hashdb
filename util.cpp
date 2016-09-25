@@ -114,7 +114,7 @@ option::ArgStatus Arg::ULong( const option::Option& option, bool msg ) {
 		return option::ARG_OK;
 	} catch ( const std::exception & ) {
 		if ( msg )
-			std::cerr << "Option '" << option.name << "' requires a numeric argument\n" << std::endl;
+			std::cerr << "Option '" << option.name << "' requires a non-negative numeric argument\n" << std::endl;
 
 		return option::ARG_ILLEGAL;
 	}
