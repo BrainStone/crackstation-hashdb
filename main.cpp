@@ -36,9 +36,9 @@ int main( int argc, char* argv[] ) {
 		return 1;
 
 	if ( options[HELP] ||
-		(options[CREATE] && (parse.nonOptionsCount() != 3)) ||
-		 (!options[CREATE] && options[VERIFY] && (parse.nonOptionsCount() != 1)) ||
-		 (!options[CREATE] && !options[VERIFY] && (parse.nonOptionsCount() <= 3)) ||
+		(options[CREATE] && !options[LIST] && (parse.nonOptionsCount() != 3)) ||
+		 (!options[CREATE] && options[VERIFY] && !options[LIST] && (parse.nonOptionsCount() != 1)) ||
+		 (!options[CREATE] && !options[VERIFY] && !options[LIST] && (parse.nonOptionsCount() <= 3)) ||
 		 (options[LIST] && (parse.nonOptionsCount() != 0)) ) {
 		option::printUsage( std::cerr, usage );
 
