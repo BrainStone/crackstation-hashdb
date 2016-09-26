@@ -51,13 +51,19 @@ int main( int argc, char* argv[] ) {
 		for ( option::Option* opt = options[UNKNOWN]; opt; opt = opt->next() )
 			std::cout << "Unknown option: " << opt->name << "\n";
 
-	if ( options[CREATE] ) {
-		createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), cores, quiet );
-		//sortIDX( parse.nonOption( 1 ), ram, quiet );
-	}
+	try {
+		if ( options[CREATE] ) {
+			createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), cores, quiet );
+			//sortIDX( parse.nonOption( 1 ), ram, quiet );
+		}
 
-	if ( options[VERIFY] ) {
-		// Just for testing....
-		sortIDX( parse.nonOption( 0 + (bool)options[CREATE] ), ram, quiet );
+		if ( options[VERIFY] ) {
+			// Just for testing....
+			sortIDX( parse.nonOption( 0 + (bool)options[CREATE] ), ram, quiet );
+		}
+	} catch ( const std::invalid_argument & e ) {
+		std::cerr << e.what() << std::endl;
+
+		return 1;
 	}
 }
