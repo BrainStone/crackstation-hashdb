@@ -16,9 +16,9 @@ public:
 	class Hash;
 
 	static HashLib * getHasher( const std::string & hashName );
-	static size_type getLength();
 
 	virtual Hash & hash( const std::string & stringToHash ) = 0;
+	virtual size_type getLength() = 0;
 
 protected:
 	static constexpr size_type length = 0;
@@ -44,6 +44,7 @@ private:
 class HashSHA1 : public HashLib {
 public:
 	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
 
 protected:
 	static constexpr size_type length = SHA_DIGEST_LENGTH;
@@ -55,6 +56,7 @@ private:
 class HashSHA256 : public HashLib {
 public:
 	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
 
 protected:
 	static constexpr size_type length = SHA256_DIGEST_LENGTH;
@@ -66,6 +68,7 @@ private:
 class HashSHA512 : public HashLib {
 public:
 	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
 
 protected:
 	static constexpr size_type length = SHA512_DIGEST_LENGTH;
