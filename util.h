@@ -2,6 +2,7 @@
 #define CRACKSTATION_UTIL_H
 
 // Includes
+#include <algorithm>
 #include <exception>
 #include <iomanip>
 #include <iostream>
@@ -55,5 +56,21 @@ struct Arg : public option::Arg {
 	static option::ArgStatus Long( const option::Option& option, bool msg );
 	static option::ArgStatus ULong( const option::Option& option, bool msg );
 };
+
+std::string & removeChars( std::string & s, const std::string& chars );
+
+template <typename T>
+std::string & join( const T & v, const std::string & delim ) {
+	std::ostringstream s;
+
+	for ( const auto & : v ) {
+		if ( &i != &v[0] )
+			s << delim;
+
+		s << i;
+	}
+
+	return s.str();
+}
 
 #endif

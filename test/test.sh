@@ -6,7 +6,7 @@ set -e
 make release
 
 #hashTypes=( "md5" "sha1" "sha512" "NTLM" "LM" "MySQL4.1+" "md5(md5)" "whirlpool" )
-hashTypes=( "md4" "md5" "sha1" "sha224" "sha256" "sha384" "sha512" "MySQL4.1+" "whirlpool" )
+hashTypes=( $(./crackstation -l) )
 
 mkdir -p test-index-files
 

@@ -119,3 +119,11 @@ option::ArgStatus Arg::ULong( const option::Option& option, bool msg ) {
 		return option::ARG_ILLEGAL;
 	}
 }
+
+std::string& removeChars( std::string& s, const std::string& chars ) {
+	s.erase( std::remove_if( s.begin(), s.end(), [&chars]( const char& c ) {
+		return chars.find( c ) != std::string::npos;
+	} ), s.end() );
+
+	return s;
+}

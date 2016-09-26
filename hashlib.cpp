@@ -1,15 +1,18 @@
 #include "hashlib.h"
 
+std::vector<std::string> HashLib::hashes( { "MD4", "MD5", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "MySQL4.1+", "Whirlpool" } );
+
 HashLib * HashLib::getHasher( const std::string & hashName ) {
 	std::string lowerHash;
 	lowerHash.resize( hashName.size() );
 	std::transform( hashName.begin(), hashName.end(), lowerHash.begin(), ::tolower );
+	removeChars( lowerHash, "-+, " );
 
 	if ( lowerHash == "md4" ) {
 		return new HashMD4();
 	} else if ( lowerHash == "md5" ) {
 		return new HashMD5();
-	} else if ( lowerHash == "sha1" ) {
+	} else if ( (lowerHash == "sha1") || (lowerHash == "sha") ) {
 		return new HashSHA1();
 	} else if ( lowerHash == "sha224" ) {
 		return new HashSHA224();
@@ -19,13 +22,21 @@ HashLib * HashLib::getHasher( const std::string & hashName ) {
 		return new HashSHA384();
 	} else if ( lowerHash == "sha512" ) {
 		return new HashSHA512();
-	} else if ( (lowerHash == "mysql4.1+") || (lowerHash == "mysql4.1") || (lowerHash == "mysql41") || (lowerHash == "mysql") ) {
+	} else if ( (lowerHash == "mysql41") || (lowerHash == "mysql") ) {
 		return new HashMySQL41();
 	} else if ( lowerHash == "whirlpool" ) {
 		return new HashWhirlpool();
 	} else {
 		throw std::invalid_argument( "The hash type \"" + hashName + "\" is unknown!" );
 	}
+}
+
+const std::vector<std::string>& HashLib::getHashes() {
+	return hashes;
+}
+
+std::string & HashLib::getHashesStr( const std::string & delim ) {
+	return join( hashes, delim );
 }
 
 HashLib::Hash::Hash() {}

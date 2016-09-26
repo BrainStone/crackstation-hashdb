@@ -1,7 +1,7 @@
 #include "main.h"
 
 enum  optionIndex {
-	UNKNOWN, HELP, CREATE, VERIFY, QUIET, CORES, RAM
+	UNKNOWN, HELP, CREATE, VERIFY, LIST, QUIET, CORES, RAM
 };
 const option::Descriptor usage[] =
 {
@@ -16,6 +16,7 @@ const option::Descriptor usage[] =
 	{ HELP   , 0, "h", "help"  , option::Arg::None, "  --help,   -h   \tPrint usage and exit." },
 	{ CREATE , 0, "c", "create", option::Arg::None, "  --create, -c   \tCreates the dictionary from the wordlist." },
 	{ VERIFY , 0, "v", "verify", option::Arg::None, "  --verify, -v   \tVerifies that the dictionary is sorted." },
+	{ LIST   , 0, "l", "list"  , option::Arg::None, "  --list  , -l   \tLists all available hashes separted by a space character." },
 	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  --quiet,  -q   \tDisables most output. Usefull for automated scripts.\n" },
 	{ CORES  , 0, "C", "cores" , Arg::ULong       , "  --cores,  -C   \tHow many cores to use when computing the hashes. (Only used when -c is set)." },
 	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  --ram,    -r   \tHow much RAM (MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
@@ -37,7 +38,8 @@ int main( int argc, char* argv[] ) {
 	if ( options[HELP] ||
 		(options[CREATE] && (parse.nonOptionsCount() != 3)) ||
 		 (!options[CREATE] && options[VERIFY] && (parse.nonOptionsCount() != 1)) ||
-		 (!options[CREATE] && !options[VERIFY] && (parse.nonOptionsCount() <= 3)) ) {
+		 (!options[CREATE] && !options[VERIFY] && (parse.nonOptionsCount() <= 3)) ||
+		 (options[LIST] && (parse.nonOptionsCount() != 0)) ) {
 		option::printUsage( std::cerr, usage );
 
 		return 0;
@@ -60,6 +62,10 @@ int main( int argc, char* argv[] ) {
 		if ( options[VERIFY] ) {
 			// Just for testing....
 			sortIDX( parse.nonOption( 0 + (bool)options[CREATE] ), ram, quiet );
+		}
+
+		if ( options[LIST] ) {
+			std::cout << HashLib::getHashesStr() << std::endl;
 		}
 	} catch ( const std::invalid_argument & e ) {
 		std::cerr << e.what() << std::endl;

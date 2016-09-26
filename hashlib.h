@@ -11,6 +11,8 @@
 #include <openssl/sha.h>
 #include <openssl/whrlpool.h>
 
+#include "util.h"
+
 class HashLib {
 public:
 	typedef unsigned char byte;
@@ -19,12 +21,17 @@ public:
 	class Hash;
 
 	static HashLib * getHasher( const std::string & hashName );
+	static const std::vector<std::string> & getHashes();
+	static std::string & getHashesStr( const std::string & delim = " " );
 
 	virtual Hash & hash( const std::string & stringToHash ) = 0;
 	virtual size_type getLength() = 0;
 
 protected:
 	static constexpr size_type length = 0;
+
+private:
+	static std::vector<std::string> hashes;
 };
 
 class HashLib::Hash {
