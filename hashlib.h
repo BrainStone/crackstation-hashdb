@@ -6,7 +6,10 @@
 #include <string>
 #include <vector>
 
+#include <openssl/md4.h>
+#include <openssl/md5.h>
 #include <openssl/sha.h>
+#include <openssl/whrlpool.h>
 
 class HashLib {
 public:
@@ -41,6 +44,30 @@ private:
 	std::vector<byte> bytes;
 };
 
+class HashMD4 : public HashLib {
+public:
+	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
+
+protected:
+	static constexpr size_type length = MD4_DIGEST_LENGTH;
+
+private:
+	byte hashStorage[length];
+};
+
+class HashMD5 : public HashLib {
+public:
+	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
+
+protected:
+	static constexpr size_type length = MD5_DIGEST_LENGTH;
+
+private:
+	byte hashStorage[length];
+};
+
 class HashSHA1 : public HashLib {
 public:
 	virtual Hash & hash( const std::string & stringToHash );
@@ -48,6 +75,18 @@ public:
 
 protected:
 	static constexpr size_type length = SHA_DIGEST_LENGTH;
+
+private:
+	byte hashStorage[length];
+};
+
+class HashSHA224 : public HashLib {
+public:
+	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
+
+protected:
+	static constexpr size_type length = SHA224_DIGEST_LENGTH;
 
 private:
 	byte hashStorage[length];
@@ -65,6 +104,18 @@ private:
 	byte hashStorage[length];
 };
 
+class HashSHA384 : public HashLib {
+public:
+	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
+
+protected:
+	static constexpr size_type length = SHA384_DIGEST_LENGTH;
+
+private:
+	byte hashStorage[length];
+};
+
 class HashSHA512 : public HashLib {
 public:
 	virtual Hash & hash( const std::string & stringToHash );
@@ -72,6 +123,31 @@ public:
 
 protected:
 	static constexpr size_type length = SHA512_DIGEST_LENGTH;
+
+private:
+	byte hashStorage[length];
+};
+
+class HashMySQL41 : public HashLib {
+public:
+	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
+
+protected:
+	static constexpr size_type length = SHA_DIGEST_LENGTH;
+
+private:
+	byte hashStorage[length];
+	byte hashStorage2[length];
+};
+
+class HashWhirlpool : public HashLib {
+public:
+	virtual Hash & hash( const std::string & stringToHash );
+	virtual size_type getLength();
+
+protected:
+	static constexpr size_type length = WHIRLPOOL_DIGEST_LENGTH;
 
 private:
 	byte hashStorage[length];

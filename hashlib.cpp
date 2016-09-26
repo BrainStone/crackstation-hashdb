@@ -5,12 +5,24 @@ HashLib * HashLib::getHasher( const std::string & hashName ) {
 	lowerHash.resize( hashName.size() );
 	std::transform( hashName.begin(), hashName.end(), lowerHash.begin(), ::tolower );
 
-	if ( hashName == "sha1" ) {
+	if ( hashName == "md4" ) {
+		return new HashMD4();
+	} else if ( hashName == "md5" ) {
+		return new HashMD5();
+	} else if ( hashName == "sha1" ) {
 		return new HashSHA1();
+	} else if ( hashName == "sha224" ) {
+		return new HashSHA224();
 	} else if ( hashName == "sha256" ) {
 		return new HashSHA256();
+	} else if ( hashName == "sha384" ) {
+		return new HashSHA384();
 	} else if ( hashName == "sha512" ) {
 		return new HashSHA512();
+	} else if ( (hashName == "mysql4.1+") || (hashName == "mysql4.1") || (hashName == "mysql41") || (hashName == "mysql") ) {
+		return new HashMySQL41();
+	} else if ( hashName == "whirlpool" ) {
+		return new HashWhirlpool();
 	} else {
 		throw std::invalid_argument( "The hash type \"" + hashName + "\" is unknown!" );
 	}
@@ -53,14 +65,47 @@ HashLib::byte HashLib::Hash::operator[]( size_type index ) const {
 
 // Hashes
 
+// MD4
+HashLib::Hash & HashMD4::hash( const std::string & stringToHash ) {
+	MD4( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+
+	return *(new HashLib::Hash( hashStorage, length ));
+}
+
+HashLib::size_type HashMD4::getLength() {
+	return length;
+}
+
+// MD5
+HashLib::Hash & HashMD5::hash( const std::string & stringToHash ) {
+	MD5( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+
+	return *(new HashLib::Hash( hashStorage, length ));
+}
+
+HashLib::size_type HashMD5::getLength() {
+	return length;
+}
+
 // SHA-1
 HashLib::Hash & HashSHA1::hash( const std::string & stringToHash ) {
 	SHA1( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
 
-	return *(new HashLib::Hash( hashStorage, getLength() ));
+	return *(new HashLib::Hash( hashStorage, length ));
 }
 
 HashLib::size_type HashSHA1::getLength() {
+	return length;
+}
+
+// SHA-224
+HashLib::Hash & HashSHA224::hash( const std::string & stringToHash ) {
+	SHA224( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+
+	return *(new HashLib::Hash( hashStorage, length ));
+}
+
+HashLib::size_type HashSHA224::getLength() {
 	return length;
 }
 
@@ -68,10 +113,21 @@ HashLib::size_type HashSHA1::getLength() {
 HashLib::Hash & HashSHA256::hash( const std::string & stringToHash ) {
 	SHA256( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
 
-	return *(new HashLib::Hash( hashStorage, getLength() ));
+	return *(new HashLib::Hash( hashStorage, length ));
 }
 
 HashLib::size_type HashSHA256::getLength() {
+	return length;
+}
+
+// SHA-384
+HashLib::Hash & HashSHA384::hash( const std::string & stringToHash ) {
+	SHA384( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+
+	return *(new HashLib::Hash( hashStorage, length ));
+}
+
+HashLib::size_type HashSHA384::getLength() {
 	return length;
 }
 
@@ -79,9 +135,32 @@ HashLib::size_type HashSHA256::getLength() {
 HashLib::Hash & HashSHA512::hash( const std::string & stringToHash ) {
 	SHA512( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
 
-	return *(new HashLib::Hash( hashStorage, getLength() ));
+	return *(new HashLib::Hash( hashStorage, length ));
 }
 
 HashLib::size_type HashSHA512::getLength() {
+	return length;
+}
+
+// MySQL4.1+
+HashLib::Hash & HashMySQL41::hash( const std::string & stringToHash ) {
+	SHA1( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+	SHA1( hashStorage, length, hashStorage2 );
+
+	return *(new HashLib::Hash( hashStorage2, length ));
+}
+
+HashLib::size_type HashMySQL41::getLength() {
+	return length;
+}
+
+// Whirlpool
+HashLib::Hash & HashWhirlpool::hash( const std::string & stringToHash ) {
+	WHIRLPOOL( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+
+	return *(new HashLib::Hash( hashStorage, length ));
+}
+
+HashLib::size_type HashWhirlpool::getLength() {
 	return length;
 }
