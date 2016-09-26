@@ -44,6 +44,7 @@ private:
 	std::vector<byte> bytes;
 };
 
+// Hashing algorithms:
 class HashMD4 : public HashLib {
 public:
 	virtual Hash & hash( const std::string & stringToHash );

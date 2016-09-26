@@ -63,8 +63,7 @@ HashLib::byte HashLib::Hash::operator[]( size_type index ) const {
 	return getNthByte( index );
 }
 
-// Hashes
-
+// Hashing algorithms:
 // MD4
 HashLib::Hash & HashMD4::hash( const std::string & stringToHash ) {
 	MD4( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
