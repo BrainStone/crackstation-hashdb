@@ -7,6 +7,9 @@
 #include <string>
 #include <vector>
 
+#include "hashlib.h"
+#include "util.h"
+
 class FileArray {
 public:
 	typedef size_t posType;
@@ -45,6 +48,9 @@ struct FileArray::IndexEntry {
 
 	unsigned char hash[hashSize]; // First 64 bits of the hash
 	unsigned char offset[offsetSize]; // Position of word in dictionary (48-bit little endian integer)
+
+	void setHash( const HashLib::Hash & hashSource );
+	void setOffset( std::streampos pos );
 
 	IndexEntry& operator=( const IndexEntry & copy );
 

@@ -27,7 +27,7 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 	for ( i = 0; i < numThreads; i++ ) {
 		threadReady[i] = false;
 
-		threads[i] = std::thread( computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut );
+		threads[i] = std::thread( computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut, std::unique_ptr<HashLib>( HashLib::getHasher( hash ) ) );
 	}
 
 	if ( !quiet ) {
@@ -66,13 +66,11 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 		std::cout << "Done!" << std::endl;
 }
 
-void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut ) {
-	size_t i;
-
+void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut, std::unique_ptr<HashLib> hasher ) {
 	std::string line;
 	std::streampos pos;
-	unsigned char hash512[SHA512_DIGEST_LENGTH];
 	FileArray::IndexEntry writeBuffer;
+	HashLib::Hash hash;
 
 	while ( true ) {
 		{
@@ -85,15 +83,10 @@ void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std
 			getline( *fileIn, line );
 		}
 
-		SHA512( (const unsigned char*)line.c_str(), line.length(), hash512 );
+		hash = hasher->hash( line );
 
-		for ( i = 0; i < FileArray::IndexEntry::hashSize; i++ ) {
-			writeBuffer.hash[i] = hash512[i];
-		}
-
-		for ( i = 0; i < FileArray::IndexEntry::offsetSize; i++ ) {
-			writeBuffer.offset[i] = getNthByte( pos, i );
-		}
+		writeBuffer.setHash( hash );
+		writeBuffer.setOffset( pos );
 
 		{
 			scoped_lock lock( *fileOutMutex );

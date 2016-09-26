@@ -70,6 +70,18 @@ void FileArray::writeCacheToFile() {
 	}
 }
 
+void FileArray::IndexEntry::setHash( const HashLib::Hash & hashSource ) {
+	for ( size_t i = 0; i < FileArray::IndexEntry::hashSize; i++ ) {
+		hash[i] = hashSource[i];
+	}
+}
+
+void FileArray::IndexEntry::setOffset( std::streampos pos ) {
+	for ( size_t i = 0; i < FileArray::IndexEntry::offsetSize; i++ ) {
+		offset[i] = getNthByte( pos, i );
+	}
+}
+
 FileArray::IndexEntry& FileArray::IndexEntry::operator=( const FileArray::IndexEntry & copy ) {
 	FileArray::posType i;
 
