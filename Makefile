@@ -12,7 +12,7 @@ LIBS = libcrypto
 # General compiler flags
 COMPILE_FLAGS = -std=c++11 -Wall -Wextra
 # Additional release-specific flags
-RCOMPILE_FLAGS = -D __NDEBUG__ -O3 -g0
+RCOMPILE_FLAGS = -D __NDEBUG__ -O3 -g0 -fdata-sections -ffunction-sections
 # Additional debug-specific flags
 DCOMPILE_FLAGS = -D __DEBUG__ -g3
 # Add additional include paths
@@ -20,7 +20,7 @@ INCLUDES = -I $(SRC_PATH)
 # General linker settings
 LINK_FLAGS = -lpthread
 # Additional release-specific linker settings
-RLINK_FLAGS =
+RLINK_FLAGS = -Wl,--gc-sections
 # Additional debug-specific linker settings
 DLINK_FLAGS =
 # Destination directory, like a jail or mounted system
