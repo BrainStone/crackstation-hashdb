@@ -5,23 +5,23 @@ HashLib * HashLib::getHasher( const std::string & hashName ) {
 	lowerHash.resize( hashName.size() );
 	std::transform( hashName.begin(), hashName.end(), lowerHash.begin(), ::tolower );
 
-	if ( hashName == "md4" ) {
+	if ( lowerHash == "md4" ) {
 		return new HashMD4();
-	} else if ( hashName == "md5" ) {
+	} else if ( lowerHash == "md5" ) {
 		return new HashMD5();
-	} else if ( hashName == "sha1" ) {
+	} else if ( lowerHash == "sha1" ) {
 		return new HashSHA1();
-	} else if ( hashName == "sha224" ) {
+	} else if ( lowerHash == "sha224" ) {
 		return new HashSHA224();
-	} else if ( hashName == "sha256" ) {
+	} else if ( lowerHash == "sha256" ) {
 		return new HashSHA256();
-	} else if ( hashName == "sha384" ) {
+	} else if ( lowerHash == "sha384" ) {
 		return new HashSHA384();
-	} else if ( hashName == "sha512" ) {
+	} else if ( lowerHash == "sha512" ) {
 		return new HashSHA512();
-	} else if ( (hashName == "mysql4.1+") || (hashName == "mysql4.1") || (hashName == "mysql41") || (hashName == "mysql") ) {
+	} else if ( (lowerHash == "mysql4.1+") || (lowerHash == "mysql4.1") || (lowerHash == "mysql41") || (lowerHash == "mysql") ) {
 		return new HashMySQL41();
-	} else if ( hashName == "whirlpool" ) {
+	} else if ( lowerHash == "whirlpool" ) {
 		return new HashWhirlpool();
 	} else {
 		throw std::invalid_argument( "The hash type \"" + hashName + "\" is unknown!" );
