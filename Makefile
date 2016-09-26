@@ -14,7 +14,7 @@ COMPILE_FLAGS = -std=c++11 -Wall -Wextra
 # Additional release-specific flags
 RCOMPILE_FLAGS = -D __NDEBUG__ -O3 -g0 -fdata-sections -ffunction-sections
 # Additional debug-specific flags
-DCOMPILE_FLAGS = -D __DEBUG__ -g3
+DCOMPILE_FLAGS = -D __DEBUG__ -Og -g3
 # Add additional include paths
 INCLUDES = -I $(SRC_PATH)
 # General linker settings
