@@ -126,20 +126,22 @@ class MoreHashAlgorithms
 
     public static function GetHashFunction($algorithm)
     {
+    	$algorithm = str_replace(array("-", "+", ".", ",", " "), "", strtolower($algorithm));
+
         if (in_array($algorithm, hash_algos())) {
             return new StandardHashAlgorithm($algorithm);
         } else {
             switch ($algorithm) {
-            case "LM":
+            case "lm":
                 return new LMHashAlgorithm();
                 break;
-            case "NTLM":
+            case "ntlm":
                 return new NTLMHashAlgorithm();
                 break;
             case "md5(md5)":
                 return new MD5MD5HexHashAlgorithm();
                 break;
-            case "MySQL4.1+":
+            case "mysql41":
                 return new MySQL41HashAlgorithm();
                 break;
             default:

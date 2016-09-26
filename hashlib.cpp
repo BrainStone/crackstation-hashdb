@@ -6,7 +6,7 @@ HashLib * HashLib::getHasher( const std::string & hashName ) {
 	std::string lowerHash;
 	lowerHash.resize( hashName.size() );
 	std::transform( hashName.begin(), hashName.end(), lowerHash.begin(), ::tolower );
-	removeChars( lowerHash, "-+, " );
+	removeChars( lowerHash, "-+., " );
 
 	if ( lowerHash == "md4" ) {
 		return new HashMD4();
