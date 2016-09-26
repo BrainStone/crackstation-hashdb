@@ -7,7 +7,7 @@ HashLib * HashLib::getHasher( const std::string & hashName ) {
 
 	if ( hashName == "sha1" ) {
 		return new HashSHA1();
-	} else if( hashName == "sha256" ) {
+	} else if ( hashName == "sha256" ) {
 		return new HashSHA256();
 	} else if ( hashName == "sha512" ) {
 		return new HashSHA512();
@@ -58,19 +58,19 @@ HashLib::byte HashLib::Hash::operator[]( size_type index ) const {
 // Hashes
 
 HashLib::Hash & HashSHA1::hash( const std::string & stringToHash ) {
-	SHA1( (const HashLib::byte*)stringToHash.c_str(), stringToHash.length(), hashStorage );
+	SHA1( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
 
 	return *(new HashLib::Hash( hashStorage, getLength() ));
 }
 
 HashLib::Hash & HashSHA256::hash( const std::string & stringToHash ) {
-	SHA256( (const HashLib::byte*)stringToHash.c_str(), stringToHash.length(), hashStorage );
+	SHA256( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
 
 	return *(new HashLib::Hash( hashStorage, getLength() ));
 }
 
 HashLib::Hash & HashSHA512::hash( const std::string & stringToHash ) {
-	SHA512( (const HashLib::byte*)stringToHash.c_str(), stringToHash.length(), hashStorage );
+	SHA512( reinterpret_cast<const HashLib::byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
 
 	return *(new HashLib::Hash( hashStorage, getLength() ));
 }
