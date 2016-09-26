@@ -8,7 +8,7 @@ if ! [ -x ./crackstation ]; then
 fi
 
 #hashTypes=( "md5" "sha1" "sha512" "NTLM" "LM" "MySQL4.1+" "md5(md5)" "whirlpool" )
-hashTypes=( "sha512" "md5" "sha1" "NTLM" "LM" "MySQL4.1+" "md5(md5)" "whirlpool" )
+hashTypes=( "sha512" "sha256" "sha1" )
 
 mkdir -p test-index-files
 
