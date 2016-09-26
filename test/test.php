@@ -44,13 +44,6 @@ while (($line = fgets($fh)) !== false) {
         echo "Successfully cracked [$cracked].\n";
     }
 
-    foreach ($results as $result) {
-        if ($result->getAlgorithmName() !== $hash_algorithm) {
-            echo "Algorithm name is not set correctly (full match).";
-            exit(1);
-        }
-    }
-
     // Partial match (first 8 bytes, 16 hex chars).
     $to_crack = substr($to_crack, 0, 16);
     $results = $lookup->crack($to_crack);
@@ -62,14 +55,6 @@ while (($line = fgets($fh)) !== false) {
         $cracked = $results[0]->getPlaintext();
         echo "Successfully cracked [$cracked] (as partial match).\n";
     }
-
-    foreach ($results as $result) {
-        if ($result->getAlgorithmName() !== $hash_algorithm) {
-            echo "Algorithm name is not set correctly (partial match).";
-            exit(1);
-        }
-    }
-
 }
 
 fclose($fh);
