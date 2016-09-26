@@ -22,7 +22,7 @@ public:
 
 	static HashLib * getHasher( const std::string & hashName );
 	static const std::vector<std::string> & getHashes();
-	static std::string & getHashesStr( const std::string & delim = " " );
+	static std::string getHashesStr( const std::string & delim = " " );
 
 	virtual Hash & hash( const std::string & stringToHash ) = 0;
 	virtual size_type getLength() = 0;

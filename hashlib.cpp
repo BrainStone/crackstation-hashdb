@@ -35,7 +35,7 @@ const std::vector<std::string>& HashLib::getHashes() {
 	return hashes;
 }
 
-std::string & HashLib::getHashesStr( const std::string & delim ) {
+std::string HashLib::getHashesStr( const std::string & delim ) {
 	return join( hashes, delim );
 }
 
