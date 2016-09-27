@@ -24,7 +24,7 @@ public:
 	static const std::vector<std::string> & getHashes();
 	static std::string getHashesStr( const std::string & delim = " " );
 
-	virtual Hash & hash( const std::string & stringToHash ) = 0;
+	virtual Hash hash( const std::string & stringToHash ) = 0;
 	virtual size_type getLength() = 0;
 
 protected:
@@ -54,7 +54,7 @@ private:
 // Hashing algorithms:
 class HashMD4 : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
@@ -66,7 +66,7 @@ private:
 
 class HashMD5 : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
@@ -78,7 +78,7 @@ private:
 
 class HashSHA1 : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
@@ -90,7 +90,7 @@ private:
 
 class HashSHA224 : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
@@ -102,7 +102,7 @@ private:
 
 class HashSHA256 : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
@@ -114,7 +114,7 @@ private:
 
 class HashSHA384 : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
@@ -126,7 +126,7 @@ private:
 
 class HashSHA512 : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
@@ -138,7 +138,7 @@ private:
 
 class HashMySQL41 : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
@@ -151,7 +151,7 @@ private:
 
 class HashWhirlpool : public HashLib {
 public:
-	virtual Hash & hash( const std::string & stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
 
 protected:
