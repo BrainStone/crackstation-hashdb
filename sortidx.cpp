@@ -18,7 +18,7 @@ void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet ) {
 		if ( !quiet ) {
 			progressBar.init( {
 				{ "Loading Cache", fileArray.getCacheSize() / 10 },
-				{ "Creating Heap", heapifyLimit / 10 },
+				{ "Creating Heap", heapifyLimit / 5 },
 				{ "Sorting Heap", fileArray.getSize() },
 				{ "Saving Cache", fileArray.getCacheSize() / 10 }
 			} );
