@@ -55,9 +55,9 @@ void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std
 			if ( fileIn->eof() )
 				break;
 
-			getline( *fileIn, line );
 			pos = fileIn->tellg();
 			progressBar->updateProgress( 0, pos, fileSize );
+			getline( *fileIn, line );
 		}
 
 		hash = hasher->hash( line );
