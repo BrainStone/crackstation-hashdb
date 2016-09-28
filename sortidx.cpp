@@ -3,38 +3,29 @@
 std::atomic<size_t> limit;
 
 void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet ) {
-	if ( !quiet )
-		std::cout << "Sorting index (may take a while)..." << std::endl;
+	ProgressBar progressBar;
+	FileArray fileArray( idxFile, cacheByteSize / FileArray::IndexEntry::indexSize, quiet ? NULL : &progressBar, false );
+	const size_t localLimit = fileArray.getSize() - 1;
+	limit = localLimit;
+	const size_t heapifyLimit = getParent( localLimit );
+	std::thread sorterThread;
 
-	{
-		// Scoping for early destruction of objects
-		ProgressBar progressBar;
-		FileArray fileArray( idxFile, cacheByteSize / FileArray::IndexEntry::indexSize, quiet ? NULL : &progressBar, false );
-		const size_t localLimit = fileArray.getSize() - 1;
-		limit = localLimit;
-		const size_t heapifyLimit = getParent( localLimit );
-		std::thread sorterThread;
-
-		if ( !quiet ) {
-			progressBar.init( {
-				{ "Loading Cache", fileArray.getCacheSize() / 10 },
-				{ "Creating Heap", heapifyLimit / 5 },
-				{ "Sorting Heap", fileArray.getSize() },
-				{ "Saving Cache", fileArray.getCacheSize() / 10 }
-			} );
-			progressBar.start();
-		}
-
-		fileArray.loadCacheFromFile();
-		heapifyIDX( fileArray, progressBar, heapifyLimit );
-		sortIDXHeap( fileArray, progressBar, localLimit );
-		fileArray.writeCacheToFile();
-
-		// Close the ProgressBar through RAII
+	if ( !quiet ) {
+		progressBar.init( {
+			{ "Sorting Index (Loading Cache)...", fileArray.getCacheSize() / 10 },
+			{ "Sorting Index (Creating Heap)...", heapifyLimit / 5 },
+			{ "Sorting Index (Sorting Heap)...", fileArray.getSize() },
+			{ "Sorting Index (Saving Cache)...", fileArray.getCacheSize() / 10 },
+		} );
+		progressBar.start();
 	}
 
-	if ( !quiet )
-		std::cout << "Done!" << std::endl;
+	fileArray.loadCacheFromFile();
+	heapifyIDX( fileArray, progressBar, heapifyLimit );
+	sortIDXHeap( fileArray, progressBar, localLimit );
+	fileArray.writeCacheToFile();
+
+	// Close the ProgressBar through RAII
 }
 
 void heapifyIDX( FileArray & fileArray, ProgressBar & progressBar, size_t heapifyLimit ) {

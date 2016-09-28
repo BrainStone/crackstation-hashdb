@@ -131,7 +131,7 @@ void ProgressBar::renderBar( double progress ) {
 	const size_t splitPos = barWidth * progress;
 	const std::string percentString = getPercentString( progress, barWidth );
 
-	std::cout << "\33[u\33[2A\33[K" << centerString( barWidth, "===== " + getActiveSegment() + "... =====" ) << '\n';
+	std::cout << "\33[u\33[2A\33[K" << centerString( barWidth, "===== " + getActiveSegment() + " =====" ) << '\n';
 	std::cout << "\33[K\33[7m" << percentString.substr( 0, splitPos ) << "\33[0m" << percentString.substr( splitPos ) << '\n';
 	std::cout << "\33[s\33[KTime elapsed: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeElapsed.count()
 		<< "s\tTime remaining: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeRemaining.count() << "s";
