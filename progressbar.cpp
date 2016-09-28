@@ -66,6 +66,9 @@ void ProgressBar::finish( bool blocking ) {
 }
 
 void ProgressBar::updateProgress( size_t numSegment, double progress ) {
+	if ( !initialized )
+		return;
+
 	activeSegment = numSegment;
 
 	scoped_lock lock( segmentsMutex );
