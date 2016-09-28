@@ -10,15 +10,15 @@ ProgressBar::ProgressBar() :
 	segmentWeights( 0 ),
 	segmentProgresses( 0 ) {}
 
-ProgressBar::ProgressBar( const std::vector<std::pair<std::string, size_t>>& segments ) : ProgressBar() {
-	init( segments );
+ProgressBar::ProgressBar( const std::vector<std::pair<std::string, size_t>>& segments, std::string( *extraDataGenerator )(double) ) : ProgressBar() {
+	init( segments, extraDataGenerator );
 }
 
 ProgressBar::~ProgressBar() {
 	finish( true );
 }
 
-void ProgressBar::init( const std::vector<std::pair<std::string, size_t>> & segments ) {
+void ProgressBar::init( const std::vector<std::pair<std::string, size_t>> & segments, std::string( *extraDataGenerator )(double) ) {
 	if ( initialized )
 		// Should I throw an exception?
 		return;
@@ -34,11 +34,13 @@ void ProgressBar::init( const std::vector<std::pair<std::string, size_t>> & segm
 		totalWeight += segment.second;
 	}
 
+	this->extraDataGenerator = extraDataGenerator;
+
 	initialized = true;
 }
 
 void ProgressBar::start() {
-	std::cout << "\33[?25l\33[s";
+	std::cout << "\n\33[?25l";
 
 	startTime = HRC::now();
 	isRunning = true;
@@ -132,7 +134,12 @@ void ProgressBar::renderBar( double progress ) {
 	std::cout << "\33[u\33[2A\33[K" << centerString( barWidth, "===== " + getActiveSegment() + "... =====" ) << '\n';
 	std::cout << "\33[K\33[7m" << percentString.substr( 0, splitPos ) << "\33[0m" << percentString.substr( splitPos ) << '\n';
 	std::cout << "\33[s\33[KTime elapsed: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeElapsed.count()
-		<< "s\tTime remaining: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeRemaining.count() << "s" << std::flush;
+		<< "s\tTime remaining: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeRemaining.count() << "s";
+
+	if ( extraDataGenerator != NULL )
+		std::cout << "\t" << extraDataGenerator( progress );
+
+	std::cout.flush();
 }
 
 double ProgressBar::getTotalProgress() {

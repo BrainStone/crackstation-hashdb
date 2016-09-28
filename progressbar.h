@@ -18,10 +18,10 @@
 class ProgressBar {
 public:
 	ProgressBar();
-	ProgressBar( const std::vector<std::pair<std::string, size_t>> & segments );
+	ProgressBar( const std::vector<std::pair<std::string, size_t>> & segments, std::string( *extraDataGenerator )(double) = NULL );
 	~ProgressBar();
 
-	void init( const std::vector<std::pair<std::string, size_t>> & segments );
+	void init( const std::vector<std::pair<std::string, size_t>> & segments, std::string( *extraDataGenerator )(double) = NULL );
 	void start();
 	void finish( bool blocking = false );
 
@@ -54,6 +54,7 @@ private:
 	std::vector<size_t> segmentWeights;
 	std::vector<double> segmentProgresses;
 	std::mutex segmentProgressesMutex;
+	std::string( *extraDataGenerator )(double);
 
 	void renderThread();
 	void renderBar( double progress );
