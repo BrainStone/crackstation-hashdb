@@ -20,4 +20,9 @@
 void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, size_t cores, bool quiet );
 void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut, std::unique_ptr<HashLib> hasher );
 
+template<size_t fileSize>
+std::string getFileProgress( double progress ) {
+
+}
+
 #endif
