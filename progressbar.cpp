@@ -40,7 +40,7 @@ void ProgressBar::init( const std::vector<std::pair<std::string, size_t>> & segm
 }
 
 void ProgressBar::start() {
-	std::cout << "\n\33[s\33[?25l";
+	std::cout << "\n\n\33[s\33[?25l";
 
 	startTime = HRC::now();
 	isRunning = true;
