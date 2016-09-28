@@ -13,7 +13,7 @@ void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet ) {
 	if ( !quiet ) {
 		progressBar.init( {
 			{ "Sorting Index (Loading Cache)...", fileArray.getCacheSize() / 10 },
-			{ "Sorting Index (Creating Heap)...", heapifyLimit / 5 },
+			{ "Sorting Index (Creating Heap)...", heapifyLimit / 10 },
 			{ "Sorting Index (Sorting Heap)...", fileArray.getSize() },
 			{ "Sorting Index (Saving Cache)...", fileArray.getCacheSize() / 10 },
 		} );
@@ -49,7 +49,7 @@ void sortIDXHeap( FileArray & fileArray, ProgressBar & progressBar, size_t numDa
 	size_t posLast;
 	size_t posTop;
 
-	for ( size_t pos = 0; pos < numDataSets; pos++ ) {
+	for ( size_t pos = 0; pos < numDataSets; ) {
 		posLast = numDataSets - pos;
 		posTop = 0;
 		limit = posLast - 1;
