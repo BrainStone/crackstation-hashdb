@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "hashlib.h"
+#include "progressbar.h"
 #include "util.h"
 
 class FileArray {
@@ -18,6 +19,8 @@ public:
 
 	FileArray( const std::string &fileName );
 	FileArray( const std::string &fileName, posType cacheSize );
+	FileArray( const std::string &fileName, ProgressBar* progressBar );
+	FileArray( const std::string &fileName, posType cacheSizee, ProgressBar* progressBar );
 	~FileArray();
 
 	posType getFileSize() const;
@@ -36,6 +39,7 @@ private:
 	const posType size;
 	const posType cacheSize;
 	std::vector<IndexEntry> cache;
+	ProgressBar* progressBar;
 
 	void loadCacheFromFile();
 	void writeCacheToFile();

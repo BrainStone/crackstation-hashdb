@@ -11,15 +11,12 @@
 #include <sstream>
 #include <string>
 #include <thread>
-#include <unistd.h>
-
-#include <sys/ioctl.h>
 
 #include "optionparser.h"
 
 // Constants
-constexpr size_t MB = 1024 * 1024;
 constexpr long long defaultTimeout = 100;
+constexpr size_t MB = 1024 * 1024;
 
 // Typedefs & Structs
 typedef std::lock_guard<std::mutex> scoped_lock;
@@ -33,10 +30,6 @@ template<class T>
 constexpr unsigned char getNthByte( T var, size_t pos ) {
 	return (unsigned char)(var >> (pos * 8) & 0xFF);
 }
-
-struct winsize getConsoleSize();
-unsigned short getConsoleHeight();
-unsigned short getConsoleWidth();
 
 size_t getNumCores();
 
@@ -58,6 +51,7 @@ struct Arg : public option::Arg {
 };
 
 std::string & removeChars( std::string & s, const std::string& chars );
+std::string centerString( size_t width, const std::string& str );
 
 template <typename T>
 std::string join( const T & v, const std::string & delim ) {

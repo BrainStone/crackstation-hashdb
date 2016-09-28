@@ -6,10 +6,9 @@
 #include <iostream>
 #include <limits>
 #include <string>
-#include <thread>
 
 #include "filearray.h"
-#include "util.h"
+#include "progressbar.h"
 
 // Functions
 // Returns the parent index.
@@ -31,13 +30,13 @@ constexpr size_t getRight( size_t i ) {
 void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet );
 
 // Turns the idx file into a heap (first step of heapsort)
-void heapifyIDX( size_t heapifyLimit );
+void heapifyIDX( FileArray & fileArray, ProgressBar & progressBar, size_t heapifyLimit );
 // Sorts the idx heap (second step of heapsort)
-void sortIDXHeap( size_t numDataSets );
+void sortIDXHeap( FileArray & fileArray, ProgressBar & progressBar, size_t numDataSets );
 
 // Checks whether a index is in the heap
 bool isInHeap( size_t pos );
 // Moves a element down the heap until it is at the right position
-void orderHeap( FileArray::IndexEntry &top, size_t posTop );
+void orderHeap( FileArray & fileArray, FileArray::IndexEntry &top, size_t posTop );
 
 #endif

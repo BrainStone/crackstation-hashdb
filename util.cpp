@@ -5,21 +5,6 @@ unsigned short formatPower;
 std::string fileSizeString;
 bool renderWithFileSize;
 
-struct winsize getConsoleSize() {
-	struct winsize size;
-	ioctl( STDOUT_FILENO, TIOCGWINSZ, &size );
-
-	return size;
-}
-
-unsigned short getConsoleHeight() {
-	return getConsoleSize().ws_row;
-}
-
-unsigned short getConsoleWidth() {
-	return getConsoleSize().ws_col;
-}
-
 size_t getNumCores() {
 	size_t out = std::thread::hardware_concurrency();
 
@@ -126,4 +111,18 @@ std::string& removeChars( std::string& s, const std::string& chars ) {
 	} ), s.end() );
 
 	return s;
+}
+
+std::string centerString( size_t width, const std::string& str ) {
+	size_t len = str.length();
+
+	if ( width < len ) {
+		return str;
+	}
+
+	int diff = width - len;
+	int pad1 = diff / 2;
+	int pad2 = diff - pad1;
+
+	return std::string( pad1, ' ' ) + str + std::string( pad2, ' ' );
 }

@@ -1,14 +1,21 @@
 #include "filearray.h"
 
 FileArray::FileArray( const std::string & fileName ) :
-	FileArray( fileName, 0 ) {}
+	FileArray( fileName, 0, NULL ) {}
 
 FileArray::FileArray( const std::string & fileName, FileArray::posType cacheSize ) :
+	FileArray( fileName, cacheSize, NULL ) {}
+
+FileArray::FileArray( const std::string & fileName, ProgressBar* progressBar ) :
+	FileArray( fileName, 0, progressBar ) {}
+
+FileArray::FileArray( const std::string & fileName, posType cacheSizee, ProgressBar* progressBar ) :
 	file( fileName, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate ),
 	fileSize( file.tellg() ),
 	size( fileSize / FileArray::IndexEntry::indexSize ),
 	cacheSize( std::min( cacheSize, size ) ),
-	cache( this->cacheSize ) {
+	cache( this->cacheSize ),
+	progressBar( progressBar ) {
 	if ( !file.good() ) {
 		throw std::invalid_argument( "File \"" + fileName + "\" does not exist!" );
 	} else if ( (FileArray::IndexEntry::indexSize * size) != fileSize ) {
@@ -55,18 +62,29 @@ void FileArray::writeEntry( const IndexEntry & entry, FileArray::posType index )
 }
 
 void FileArray::loadCacheFromFile() {
+	size_t i = 0;
+
 	file.seekg( 0 );
 
 	for ( IndexEntry & entry : cache ) {
 		file.read( reinterpret_cast<char*>(&entry), FileArray::IndexEntry::indexSize );
+
+		if ( progressBar != NULL )
+			progressBar->updateProgress( 0, ++i, cacheSize );
 	}
 }
 
 void FileArray::writeCacheToFile() {
+	const size_t lastSegment = (progressBar != NULL) ? (progressBar->getNumSegments() - 1) : 0;
+	size_t i = 0;
+
 	file.seekp( 0 );
 
 	for ( const IndexEntry & entry : cache ) {
 		file.write( reinterpret_cast<const char*>(&entry), FileArray::IndexEntry::indexSize );
+
+		if ( progressBar != NULL )
+			progressBar->updateProgress( lastSegment, ++i, cacheSize );
 	}
 }
 
