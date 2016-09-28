@@ -53,7 +53,7 @@ private:
 	std::vector<std::string> segmentNames;
 	std::vector<size_t> segmentWeights;
 	std::vector<double> segmentProgresses;
-	std::mutex segmentProgressesMutex;
+	std::mutex segmentsMutex;
 	std::string( *extraDataGenerator )(double);
 
 	void renderThread();

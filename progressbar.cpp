@@ -68,7 +68,7 @@ void ProgressBar::finish( bool blocking ) {
 void ProgressBar::updateProgress( size_t numSegment, double progress ) {
 	activeSegment = numSegment;
 
-	scoped_lock lock( segmentProgressesMutex );
+	scoped_lock lock( segmentsMutex );
 
 	segmentProgresses[numSegment] = progress;
 }
@@ -78,6 +78,8 @@ void ProgressBar::updateProgress( size_t numSegment, size_t workDone, size_t wor
 }
 
 int ProgressBar::getNumSegments() {
+	scoped_lock lock( segmentsMutex );
+
 	return segmentProgresses.size();
 }
 
@@ -143,8 +145,8 @@ void ProgressBar::renderBar( double progress ) {
 }
 
 double ProgressBar::getTotalProgress() {
-	scoped_lock lock( segmentProgressesMutex );
 	double progress = 0.0;
+	scoped_lock lock( segmentsMutex );
 
 	for ( size_t i = 0; i < segmentProgresses.size(); i++ ) {
 		progress += div( segmentWeights[i], totalWeight ) * segmentProgresses[i];
@@ -154,5 +156,7 @@ double ProgressBar::getTotalProgress() {
 }
 
 const std::string & ProgressBar::getActiveSegment() {
+	scoped_lock lock( segmentsMutex );
+
 	return segmentNames[activeSegment];
 }
