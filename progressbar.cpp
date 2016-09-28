@@ -5,6 +5,7 @@ ProgressBar::ProgressBar() :
 	isRunning( false ),
 	totalWeight( 0 ),
 	thread( nullptr ),
+	activeSegment( 0 ),
 	segmentNames( 0 ),
 	segmentWeights( 0 ),
 	segmentProgresses( 0 ) {}
@@ -40,6 +41,7 @@ void ProgressBar::start() {
 	std::cout << "\33[?25l\33[s";
 
 	startTime = HRC::now();
+	isRunning = true;
 	thread = std::unique_ptr<std::thread>( new std::thread( &ProgressBar::renderThread, this ) );
 
 	auto handle = thread->native_handle();
@@ -52,15 +54,18 @@ void ProgressBar::finish( bool blocking ) {
 
 	isRunning = false;
 
-	std::cout << "\33[?25h\n";
-
 	if ( blocking && thread->joinable() )
 		thread->join();
 
-	std::cout.flush();
+	// Make sure the bar is filled
+	renderBar( 1.0 );
+
+	std::cout << "\33[?25h\n" << std::flush;
 }
 
 void ProgressBar::updateProgress( size_t numSegment, double progress ) {
+	activeSegment = numSegment;
+
 	scoped_lock lock( segmentProgressesMutex );
 
 	segmentProgresses[numSegment] = progress;
@@ -72,6 +77,11 @@ void ProgressBar::updateProgress( size_t numSegment, size_t workDone, size_t wor
 
 int ProgressBar::getNumSegments() {
 	return segmentProgresses.size();
+}
+
+template<typename T>
+inline double ProgressBar::div( const T & lhs, const T & rhs ) {
+	return static_cast<double>(lhs) / static_cast<double>(rhs);
 }
 
 std::string ProgressBar::getPercentString( double progress, size_t width ) {
@@ -101,14 +111,14 @@ void ProgressBar::renderThread() {
 	double progress;
 
 	while ( isRunning ) {
+		std::this_thread::sleep_for( std::chrono::milliseconds( defaultTimeout ) );
+
 		progress = getTotalProgress();
 
 		if ( progress == 1.0 )
 			return;
 
 		renderBar( progress );
-
-		std::this_thread::sleep_for( std::chrono::milliseconds( defaultTimeout ) );
 	}
 }
 
@@ -119,9 +129,10 @@ void ProgressBar::renderBar( double progress ) {
 	const size_t splitPos = barWidth * progress;
 	const std::string percentString = getPercentString( progress, barWidth );
 
-	std::cout << "\33[u\33[s\33[K" << centerString( barWidth, "--- " + getActiveSegment() + "... ---" ) << '\n';
-	std::cout << "\33[K\33[7m" << percentString.substr( 0, splitPos ) << "\33[7m" << percentString.substr( splitPos ) << '\n';
-	std::cout << "\33[KTime elapsed: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeElapsed.count() << "s\t\tTime remaining: " << timeRemaining.count() << std::flush;
+	std::cout << "\33[u\33[2A\33[K" << centerString( barWidth, "===== " + getActiveSegment() + "... =====" ) << '\n';
+	std::cout << "\33[K\33[7m" << percentString.substr( 0, splitPos ) << "\33[0m" << percentString.substr( splitPos ) << '\n';
+	std::cout << "\33[s\33[KTime elapsed: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeElapsed.count()
+		<< "s\tTime remaining: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeRemaining.count() << "s" << std::flush;
 }
 
 double ProgressBar::getTotalProgress() {
@@ -136,12 +147,5 @@ double ProgressBar::getTotalProgress() {
 }
 
 const std::string & ProgressBar::getActiveSegment() {
-	const std::string noneString = "n/a";
-
-	for ( size_t i = 0; i < segmentProgresses.size(); i++ ) {
-		if ( segmentProgresses[i] < 1.0 )
-			return segmentNames[i];
-	}
-
-	return noneString;
+	return segmentNames[activeSegment];
 }

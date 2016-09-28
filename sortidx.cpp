@@ -9,55 +9,28 @@ void sortIDX( const std::string & idxFile, size_t cacheByteSize, bool quiet ) {
 	{
 		// Scoping for early destruction of objects
 		ProgressBar progressBar;
-		FileArray fileArray( idxFile, cacheByteSize / FileArray::IndexEntry::indexSize, &progressBar );
+		FileArray fileArray( idxFile, cacheByteSize / FileArray::IndexEntry::indexSize, quiet ? NULL : &progressBar, false );
 		const size_t localLimit = fileArray.getSize() - 1;
 		limit = localLimit;
 		const size_t heapifyLimit = getParent( localLimit );
 		std::thread sorterThread;
 
-		progressBar.init( {
-			{ "Loading Cache", fileArray.getCacheSize() / 10 },
-			{"Creating Heap", heapifyLimit / 3},
-			{"Sorting Heap", fileArray.getSize() },
-			{ "Savng Cache", fileArray.getCacheSize() / 10 }
-		} );
+		if ( !quiet ) {
+			progressBar.init( {
+				{ "Loading Cache", fileArray.getCacheSize() / 10 },
+				{"Creating Heap", heapifyLimit / 3},
+				{"Sorting Heap", fileArray.getSize() },
+				{ "Savng Cache", fileArray.getCacheSize() / 10 }
+			} );
+			progressBar.start();
+		}
 
+		fileArray.loadCacheFromFile();
 		heapifyIDX( fileArray, progressBar, heapifyLimit );
 		sortIDXHeap( fileArray, progressBar, localLimit );
+		fileArray.writeCacheToFile();
 
-		/*
-
-		fileArray = &localFileArray;
-		sorterThread = std::thread( heapifyIDX, heapifyLimit );
-
-		if ( !quiet ) {
-			std::cout << "\33[u";
-			initProgress( heapifyLimit + localLimit, false );
-
-			while ( pos <= heapifyLimit ) {
-				std::this_thread::sleep_for( std::chrono::milliseconds( defaultTimeout ) );
-
-				printProgress( (size_t)pos );
-			}
-		}
-
-		sorterThread.join();
-
-		pos = 0;
-
-
-
-		if ( !quiet ) {
-			while ( pos < localLimit ) {
-				std::this_thread::sleep_for( std::chrono::milliseconds( defaultTimeout ) );
-
-				printProgress( heapifyLimit + pos );
-			}
-		}
-
-		sorterThread.join();*/
-
-		// Close the FileArray through RAII
+		// Close the ProgressBar through RAII
 	}
 
 	if ( !quiet )

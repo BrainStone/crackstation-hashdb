@@ -60,7 +60,7 @@ void initProgress( std::streampos fileSize, bool withFileSize ) {
 }
 
 void printProgress( std::streampos currentPos ) {
-	int barWidth = getConsoleWidth() - (renderWithFileSize ? 35 : 9);
+	int barWidth = 80 - (renderWithFileSize ? 35 : 9);
 	double progress = (double)currentPos / totalFileSize;
 
 	std::cout << "\33[s\33[K[";

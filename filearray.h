@@ -17,10 +17,10 @@ public:
 
 	struct IndexEntry;
 
-	FileArray( const std::string &fileName );
-	FileArray( const std::string &fileName, posType cacheSize );
-	FileArray( const std::string &fileName, ProgressBar* progressBar );
-	FileArray( const std::string &fileName, posType cacheSizee, ProgressBar* progressBar );
+	FileArray( const std::string &fileName, bool autoLoad = true );
+	FileArray( const std::string &fileName, posType cacheSize, bool autoLoad = true );
+	FileArray( const std::string &fileName, ProgressBar* progressBar, bool autoLoad = true );
+	FileArray( const std::string &fileName, posType cacheSizee, ProgressBar* progressBar, bool autoLoad = true );
 	~FileArray();
 
 	posType getFileSize() const;
@@ -29,6 +29,9 @@ public:
 
 	void readEntry( IndexEntry &entry, posType index );
 	void writeEntry( const IndexEntry &entry, posType index );
+
+	void loadCacheFromFile();
+	void writeCacheToFile();
 
 private:
 	FileArray() = delete;
@@ -40,9 +43,7 @@ private:
 	const posType cacheSize;
 	std::vector<IndexEntry> cache;
 	ProgressBar* progressBar;
-
-	void loadCacheFromFile();
-	void writeCacheToFile();
+	bool autoLoad;
 };
 
 struct FileArray::IndexEntry {

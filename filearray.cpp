@@ -1,21 +1,22 @@
 #include "filearray.h"
 
-FileArray::FileArray( const std::string & fileName ) :
-	FileArray( fileName, 0, NULL ) {}
+FileArray::FileArray( const std::string & fileName, bool autoLoad ) :
+	FileArray( fileName, 0, NULL, autoLoad ) {}
 
-FileArray::FileArray( const std::string & fileName, FileArray::posType cacheSize ) :
-	FileArray( fileName, cacheSize, NULL ) {}
+FileArray::FileArray( const std::string & fileName, FileArray::posType cacheSize, bool autoLoad ) :
+	FileArray( fileName, cacheSize, NULL, autoLoad ) {}
 
-FileArray::FileArray( const std::string & fileName, ProgressBar* progressBar ) :
-	FileArray( fileName, 0, progressBar ) {}
+FileArray::FileArray( const std::string & fileName, ProgressBar* progressBar, bool autoLoad ) :
+	FileArray( fileName, 0, progressBar, autoLoad ) {}
 
-FileArray::FileArray( const std::string & fileName, posType cacheSizee, ProgressBar* progressBar ) :
+FileArray::FileArray( const std::string & fileName, posType cacheSize, ProgressBar* progressBar, bool autoLoad ) :
 	file( fileName, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate ),
 	fileSize( file.tellg() ),
 	size( fileSize / FileArray::IndexEntry::indexSize ),
 	cacheSize( std::min( cacheSize, size ) ),
 	cache( this->cacheSize ),
-	progressBar( progressBar ) {
+	progressBar( progressBar ),
+	autoLoad( autoLoad ) {
 	if ( !file.good() ) {
 		throw std::invalid_argument( "File \"" + fileName + "\" does not exist!" );
 	} else if ( (FileArray::IndexEntry::indexSize * size) != fileSize ) {
@@ -24,11 +25,13 @@ FileArray::FileArray( const std::string & fileName, posType cacheSizee, Progress
 			"File size of \"" + fileName + "\" is " + std::to_string( fileSize ) + "!" );
 	}
 
-	loadCacheFromFile();
+	if ( autoLoad )
+		loadCacheFromFile();
 }
 
 FileArray::~FileArray() {
-	writeCacheToFile();
+	if ( autoLoad )
+		writeCacheToFile();
 }
 
 FileArray::posType FileArray::getFileSize() const {

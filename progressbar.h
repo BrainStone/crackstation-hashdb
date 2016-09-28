@@ -49,6 +49,7 @@ private:
 	size_t totalWeight;
 	HRC::time_point startTime;
 	std::unique_ptr<std::thread> thread;
+	std::atomic<size_t> activeSegment;
 	std::vector<std::string> segmentNames;
 	std::vector<size_t> segmentWeights;
 	std::vector<double> segmentProgresses;
@@ -61,8 +62,3 @@ private:
 };
 
 #endif
-
-template<typename T>
-inline double ProgressBar::div( const T & lhs, const T & rhs ) {
-	return static_cast<double>(lhs) / static_cast<double>(rhs);
-}
