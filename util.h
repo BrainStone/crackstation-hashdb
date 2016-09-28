@@ -14,8 +14,7 @@
 
 #include "optionparser.h"
 
-// Constants
-constexpr long long defaultTimeout = 100;
+// Constants and Constant Expressions
 constexpr size_t MB = 1024 * 1024;
 
 // Typedefs & Structs
@@ -39,11 +38,6 @@ unsigned short getBytePower( std::streampos size );
 std::string getBytePowerPostfix( unsigned short power );
 // Formats the size. If power is -1 it automatically detects the power
 std::string getFormatedSize( std::streampos size, int power = -1 );
-
-// Initializes the progress bar
-void initProgress( std::streampos fileSize, bool withFileSize );
-// Prints the progressbar
-void printProgress( std::streampos currentPos );
 
 struct Arg : public option::Arg {
 	static option::ArgStatus Long( const option::Option& option, bool msg );

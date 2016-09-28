@@ -1,6 +1,7 @@
 #ifndef CRACKSTATION_PROGRESSBAR_H
 #define CRACKSTATION_PROGRESSBAR_H
 
+#include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -18,10 +19,10 @@
 class ProgressBar {
 public:
 	ProgressBar();
-	ProgressBar( const std::vector<std::pair<std::string, size_t>> & segments, std::string( *extraDataGenerator )(double) = NULL );
+	ProgressBar( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator = std::function<std::string( double )>() );
 	~ProgressBar();
 
-	void init( const std::vector<std::pair<std::string, size_t>> & segments, std::string( *extraDataGenerator )(double) = NULL );
+	void init( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator = std::function<std::string( double )>() );
 	void start();
 	void finish( bool blocking = false );
 
@@ -54,7 +55,7 @@ private:
 	std::vector<size_t> segmentWeights;
 	std::vector<double> segmentProgresses;
 	std::mutex segmentsMutex;
-	std::string( *extraDataGenerator )(double);
+	std::function<std::string( double )> extraDataGenerator;
 
 	void renderThread();
 	void renderBar( double progress );

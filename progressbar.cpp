@@ -10,7 +10,7 @@ ProgressBar::ProgressBar() :
 	segmentWeights( 0 ),
 	segmentProgresses( 0 ) {}
 
-ProgressBar::ProgressBar( const std::vector<std::pair<std::string, size_t>>& segments, std::string( *extraDataGenerator )(double) ) : ProgressBar() {
+ProgressBar::ProgressBar( const std::vector<std::pair<std::string, size_t>>& segments, std::function<std::string( double )> extraDataGenerator ) : ProgressBar() {
 	init( segments, extraDataGenerator );
 }
 
@@ -18,7 +18,7 @@ ProgressBar::~ProgressBar() {
 	finish( true );
 }
 
-void ProgressBar::init( const std::vector<std::pair<std::string, size_t>> & segments, std::string( *extraDataGenerator )(double) ) {
+void ProgressBar::init( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator ) {
 	if ( initialized )
 		// Should I throw an exception?
 		return;
@@ -73,7 +73,7 @@ void ProgressBar::updateProgress( size_t numSegment, double progress ) {
 
 	scoped_lock lock( segmentsMutex );
 
-	segmentProgresses[numSegment] = progress;
+	segmentProgresses[numSegment] = std::max( 0.0, std::min( 1.0, progress ) );
 }
 
 void ProgressBar::updateProgress( size_t numSegment, size_t workDone, size_t workToDo ) {
@@ -141,7 +141,7 @@ void ProgressBar::renderBar( double progress ) {
 	std::cout << "\33[s\33[KTime elapsed: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeElapsed.count()
 		<< "s\tTime remaining: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeRemaining.count() << "s";
 
-	if ( extraDataGenerator != NULL )
+	if ( extraDataGenerator )
 		std::cout << "\t" << extraDataGenerator( progress );
 
 	std::cout.flush();

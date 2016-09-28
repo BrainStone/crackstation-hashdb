@@ -1,10 +1,5 @@
 #include "util.h"
 
-std::streampos totalFileSize;
-unsigned short formatPower;
-std::string fileSizeString;
-bool renderWithFileSize;
-
 size_t getNumCores() {
 	size_t out = std::thread::hardware_concurrency();
 
@@ -48,35 +43,6 @@ std::string getFormatedSize( std::streampos size, int power ) {
 	ss << ' ' << getBytePowerPostfix( formatPower );
 
 	return ss.str();
-}
-
-void initProgress( std::streampos fileSize, bool withFileSize ) {
-	totalFileSize = fileSize;
-	formatPower = getBytePower( fileSize );
-	fileSizeString = getFormatedSize( fileSize, formatPower );
-	renderWithFileSize = withFileSize;
-
-	std::cout << "\33[?25l";
-}
-
-void printProgress( std::streampos currentPos ) {
-	int barWidth = 80 - (renderWithFileSize ? 35 : 9);
-	double progress = (double)currentPos / totalFileSize;
-
-	std::cout << "\33[s\33[K[";
-	int pos = barWidth * progress;
-	for ( int i = 0; i < barWidth; ++i ) {
-		if ( i < pos ) std::cout << '=';
-		else if ( i == pos ) std::cout << '>';
-		else std::cout << ' ';
-	}
-
-	std::cout << "] " << std::setw( 5 ) << std::fixed << std::setprecision( 1 ) << progress * 100.0 << '%';
-
-	if ( renderWithFileSize )
-		std::cout << ' ' << getFormatedSize( currentPos, formatPower ) << " / " << fileSizeString;
-
-	std::cout << "\33[u" << std::flush;
 }
 
 option::ArgStatus Arg::Long( const option::Option& option, bool msg ) {
