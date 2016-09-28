@@ -3,7 +3,9 @@
 set -e
 
 # Rebuild ./crackstation if necessary
-make release
+if ! [ -x ./crackstation ]; then
+  make release
+fi
 
 #hashTypes=( "md5" "sha1" "sha512" "NTLM" "LM" "MySQL4.1+" "md5(md5)" "whirlpool" )
 hashTypes=( $(./crackstation -l) )
