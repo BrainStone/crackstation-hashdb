@@ -13,12 +13,12 @@ const option::Descriptor usage[] =
 													"  Verify dictionary:\n"
 													"    crackstation -v [-q] <dictionary>\n\n\n"
 													"Options:" },
-	{ HELP   , 0, "h", "help"  , option::Arg::None, "  --help,   -h   \tPrint usage and exit." },
-	{ CREATE , 0, "c", "create", option::Arg::None, "  --create, -c   \tCreates the dictionary from the wordlist." },
-	{ VERIFY , 0, "v", "verify", option::Arg::None, "  --verify, -v   \tVerifies that the dictionary is sorted." },
-	{ LIST   , 0, "l", "list"  , option::Arg::None, "  --list  , -l   \tLists all available hashes separted by a space character." },
-	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  --quiet,  -q   \tDisables most output. Usefull for automated scripts.\n" },
-	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  --ram,    -r   \tHow much RAM (MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
+	{ HELP   , 0, "h", "help"  , option::Arg::None, "  -h, --help,    \tPrint usage and exit." },
+	{ CREATE , 0, "c", "create", option::Arg::None, "  -c, --create   \tCreates the dictionary from the wordlist." },
+	{ VERIFY , 0, "v", "verify", option::Arg::None, "  -v, --verify   \tVerifies that the dictionary is sorted." },
+	{ LIST   , 0, "l", "list"  , option::Arg::None, "  -l, --list     \tLists all available hashes separted by a space character." },
+	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  -q, --quiet    \tDisables most output. Usefull for automated scripts.\n" },
+	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  -r, --ram      \tHow much RAM (MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
 	{ UNKNOWN, 0, "" ,  ""     , option::Arg::None, "\nExamples:\n"
 													"  crackstation -c words.txt words-sha512.idx sha512\n"
 													"  crackstation words.txt words-md5.idx md5 827ccb0eea8a706c4c34a16891f84e7b\n" },
