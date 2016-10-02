@@ -15,13 +15,10 @@
 
 #include "filearray.h"
 #include "progressbar.h"
-#include "queue.h"
 #include "util.h"
 
 // Functions
 void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, size_t cores, bool quiet );
-void readWordlist( Queue<std::pair<std::string, std::streampos>>* readQueue, std::ifstream* fileIn, size_t numHasherThreads );
-void writeIndex( Queue<FileArray::IndexEntry>* writeQueue, std::ofstream* fileOut, size_t numHasherThreads );
-void computeHashes( const std::string* hashName, Queue<std::pair<std::string, std::streampos>>* readQueue, Queue<FileArray::IndexEntry>* writeQueue, ProgressBar* progressBar, const std::streampos fileSize );
+void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut, const std::streampos fileSize, std::unique_ptr<HashLib> hasher, ProgressBar* progressBar );
 
 #endif
