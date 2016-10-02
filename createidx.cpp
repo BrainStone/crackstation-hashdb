@@ -2,11 +2,10 @@
 
 void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, size_t cores, bool quiet ) {
 	size_t i;
-	const size_t numThreads = (cores == 0) ? getNumCores() : cores;
+	const size_t numThreads = ((cores == 0) ? getNumCores() : cores) + 2;
 	std::vector<std::thread> threads( numThreads );
-	std::vector<std::atomic<bool>> threadReady( numThreads );
-	std::mutex fileInMutex;
-	std::mutex fileOutMutex;
+	Queue<std::pair<std::string, std::streampos>> readQueue( MB );
+	Queue<FileArray::IndexEntry> writeQueue( MB );
 	std::ifstream fileIn( wordlist, std::ios::in | std::ios::ate );
 	std::ofstream fileOut( idxFile, std::ios::out | std::ios::trunc );
 	const std::streampos fileSize = fileIn.tellg();
@@ -30,9 +29,12 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 	}
 
 	for ( i = 0; i < numThreads; i++ ) {
-		threadReady[i] = false;
-
-		threads[i] = std::thread( computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut, fileSize, std::unique_ptr<HashLib>( HashLib::getHasher( hash ) ), &progressBar );
+		if ( i == 0 )
+			threads[i] = std::thread( readWordlist, &readQueue, &fileIn, numThreads - 2 );
+		else if ( i == (numThreads - 1) )
+			threads[i] = std::thread( writeIndex, &writeQueue, &fileOut, numThreads - 2 );
+		else
+			threads[i] = std::thread( computeHashes, &hash, &readQueue, &writeQueue, &progressBar, fileSize );
 	}
 
 	for ( i = 0; i < numThreads; i++ )
@@ -42,36 +44,67 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 	fileOut.close();
 }
 
-void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut, const std::streampos fileSize, std::unique_ptr<HashLib> hasher, ProgressBar* progressBar ) {
+void readWordlist( Queue<std::pair<std::string, std::streampos>>* readQueue, std::ifstream * fileIn, size_t numHasherThreads ) {
 	std::string line;
 	std::streampos pos;
+
+	while ( !fileIn->eof() ) {
+		pos = fileIn->tellg();
+		getline( *fileIn, line );
+
+		if ( !line.empty() )
+			readQueue->push( std::make_pair( line, pos ) );
+	}
+
+	for ( size_t i = 0; i < numHasherThreads; i++ )
+		readQueue->push( std::make_pair( "", -1 ) );
+
+	std::cout << "readWordlist" << std::endl;
+}
+
+void writeIndex( Queue<FileArray::IndexEntry>* writeQueue, std::ofstream * fileOut, size_t numHasherThreads ) {
 	FileArray::IndexEntry writeBuffer;
+	FileArray::IndexEntry emptyHash;
+	size_t numEmptyHashes = 0;
+
+	emptyHash.setHash( HashLib::Hash() );
+
+	while ( numEmptyHashes < numHasherThreads ) {
+		writeQueue->pop( writeBuffer );
+
+		if ( writeBuffer == emptyHash )
+			numEmptyHashes++;
+		else
+			fileOut->write( reinterpret_cast<char*>(&writeBuffer), FileArray::IndexEntry::indexSize );
+	}
+
+	std::cout << "writeIndex" << std::endl;
+}
+
+void computeHashes( const std::string* hashName, Queue<std::pair<std::string, std::streampos>>* readQueue, Queue<FileArray::IndexEntry>* writeQueue, ProgressBar* progressBar, const std::streampos fileSize ) {
+	std::pair<std::string, std::streampos> line;
+	FileArray::IndexEntry writeBuffer;
+	HashLib* hasher = HashLib::getHasher( *hashName );
 	HashLib::Hash hash;
 
 	while ( true ) {
-		{
-			scoped_lock lock( *fileInMutex );
+		readQueue->pop( line );
 
-			if ( fileIn->eof() )
-				break;
-
-			pos = fileIn->tellg();
-			getline( *fileIn, line );
-		}
-
-		progressBar->updateProgress( 0, pos, fileSize );
-
-		hash = hasher->hash( line );
+		if ( line.second == -1 )
+			hash = HashLib::Hash();
+		else
+			hash = hasher->hash( line.first );
 
 		writeBuffer.setHash( hash );
-		writeBuffer.setOffset( pos );
+		writeBuffer.setOffset( line.second );
 
-		{
-			scoped_lock lock( *fileOutMutex );
+		writeQueue->push( writeBuffer );
 
-			fileOut->write( (char*)&writeBuffer, FileArray::IndexEntry::indexSize );
-		}
+		if ( line.second == -1 )
+			break;
+
+		progressBar->updateProgress( 0, line.second, fileSize );
 	}
 
-	*threadReady = true;
+	std::cout << "computeHashes" << std::endl;
 }

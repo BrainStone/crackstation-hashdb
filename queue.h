@@ -9,20 +9,21 @@
 template <typename T>
 class Queue {
 public:
-	T() = default;
-	T( size_t limit ) : limit_( limit ) {}
+	Queue() : size_( 0 ), limit_( 0 ) {}
+	Queue( size_t limit ) : size_( 0 ), limit_( limit ) {}
 
 	T pop() {
 		std::unique_lock<std::mutex> mlock( mutex_ );
 
-		while ( queue_.empty() ) {
+		while ( size_ == 0 ) {
 			cond_.wait( mlock );
 		}
 
-		unlockIfUnderLimit();
-
 		auto item = queue_.front();
 		queue_.pop();
+		--size_;
+
+		unlockIfUnderLimit();
 
 		return item;
 	}
@@ -30,22 +31,24 @@ public:
 	void pop( T& item ) {
 		std::unique_lock<std::mutex> mlock( mutex_ );
 
-		while ( queue_.empty() ) {
+		while ( size_ == 0 ) {
 			cond_.wait( mlock );
 		}
 
-		unlockIfUnderLimit();
-
 		item = queue_.front();
 		queue_.pop();
+		--size_;
+
+		unlockIfUnderLimit();
 	}
 
 	void push( const T& item ) {
-		std::unique_lock<std::mutex> mlock( mutex_ );
-
 		lockIfOverLimit();
 
+		std::unique_lock<std::mutex> mlock( mutex_ );
+
 		queue_.push( item );
+		++size_;
 
 		mlock.unlock();
 		cond_.notify_one();
@@ -57,11 +60,12 @@ public:
 	}
 
 	void push( T&& item ) {
-		std::unique_lock<std::mutex> mlock( mutex_ );
-
 		lockIfOverLimit();
 
+		std::unique_lock<std::mutex> mlock( mutex_ );
+
 		queue_.push( std::move( item ) );
+		++size_;
 
 		mlock.unlock();
 		cond_.notify_one();
@@ -73,9 +77,7 @@ public:
 	}
 
 	int size() {
-		std::unique_lock<std::mutex> mlock( mutex_ );
-
-		return queue_.size();
+		return size_;
 	}
 
 private:
@@ -83,16 +85,18 @@ private:
 	std::mutex mutex_;
 	std::mutex capMutex_;
 	std::condition_variable cond_;
+	std::condition_variable capCond_;
+	std::atomic<size_t> size_;
 	const size_t limit_;
 
 	void lockIfOverLimit() {
 		if ( limit_ == 0 )
 			return;
 
-		if ( queue_.size() >= limit_ ) {
-			capMutex_.lock();
-			capMutex_.lock();
-			capMutex_.unlock();
+		std::unique_lock<std::mutex> capLock( capMutex_ );
+
+		if ( size_ >= limit_ ) {
+			capCond_.wait( capLock );
 		}
 	}
 
@@ -100,10 +104,8 @@ private:
 		if ( limit_ == 0 )
 			return;
 
-		if ( queue_.size() == (limit_ / 2) )
-			capMutex_.try_lock();
-
-		capMutex_.unlock();
+		if ( size_ == (limit_ / 2) )
+			capCond_.notify_all();
 	}
 };
 
