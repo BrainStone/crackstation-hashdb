@@ -18,6 +18,21 @@ ProgressBar::~ProgressBar() {
 	finish( true );
 }
 
+winsize ProgressBar::getConsoleSize() {
+	struct winsize size;
+	ioctl( STDOUT_FILENO, TIOCGWINSZ, &size );
+
+	return size;
+}
+
+unsigned short ProgressBar::getConsoleHeight() {
+	return getConsoleSize().ws_row;
+}
+
+unsigned short ProgressBar::getConsoleWidth() {
+	return getConsoleSize().ws_col;
+}
+
 void ProgressBar::init( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator ) {
 	if ( initialized )
 		// Should I throw an exception?
@@ -97,21 +112,6 @@ std::string ProgressBar::getPercentString( double progress, size_t width ) {
 	sstr << std::setw( 5 ) << std::fixed << std::setprecision( 1 ) << progress * 100.0 << '%';
 
 	return centerString( width, sstr.str() );
-}
-
-winsize ProgressBar::getConsoleSize() {
-	struct winsize size;
-	ioctl( STDOUT_FILENO, TIOCGWINSZ, &size );
-
-	return size;
-}
-
-unsigned short ProgressBar::getConsoleHeight() {
-	return getConsoleSize().ws_row;
-}
-
-unsigned short ProgressBar::getConsoleWidth() {
-	return getConsoleSize().ws_col;
 }
 
 void ProgressBar::renderThread() {

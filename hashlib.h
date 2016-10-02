@@ -52,7 +52,7 @@ private:
 };
 
 // Hashing algorithms:
-class HashMD4 : public HashLib {
+class HashMD4 final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
@@ -64,7 +64,7 @@ private:
 	byte hashStorage[length];
 };
 
-class HashMD5 : public HashLib {
+class HashMD5 final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
@@ -76,7 +76,7 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA1 : public HashLib {
+class HashSHA1 final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
@@ -88,7 +88,7 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA224 : public HashLib {
+class HashSHA224 final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
@@ -100,7 +100,7 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA256 : public HashLib {
+class HashSHA256 final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
@@ -112,7 +112,7 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA384 : public HashLib {
+class HashSHA384 final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
@@ -124,7 +124,7 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA512 : public HashLib {
+class HashSHA512 final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
@@ -136,7 +136,7 @@ private:
 	byte hashStorage[length];
 };
 
-class HashMySQL41 : public HashLib {
+class HashMySQL41 final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();
@@ -149,7 +149,7 @@ private:
 	byte hashStorage2[length];
 };
 
-class HashWhirlpool : public HashLib {
+class HashWhirlpool final : public HashLib {
 public:
 	virtual Hash hash( const std::string & stringToHash );
 	virtual size_type getLength();

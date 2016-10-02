@@ -1,17 +1,15 @@
 #include "createidx.h"
 
-void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hash, size_t cores, bool quiet ) {
-	size_t i;
-	const size_t numThreads = (cores == 0) ? getNumCores() : cores;
-	std::vector<std::thread> threads( numThreads );
-	std::vector<std::atomic<bool>> threadReady( numThreads );
-	std::mutex fileInMutex;
-	std::mutex fileOutMutex;
+void createIDX( const std::string & wordlist, const std::string & idxFile, const std::string & hashString, bool quiet ) {
 	std::ifstream fileIn( wordlist, std::ios::in | std::ios::ate );
 	std::ofstream fileOut( idxFile, std::ios::out | std::ios::trunc );
 	const std::streampos fileSize = fileIn.tellg();
-	std::streampos pos;
 	ProgressBar progressBar;
+	std::unique_ptr<HashLib> hasher;
+	std::streampos pos;
+	std::string line;
+	FileArray::IndexEntry writeBuffer;
+	HashLib::Hash hash;
 
 	if ( !fileIn.good() ) {
 		throw std::invalid_argument( "File \"" + wordlist + "\" does not exist!" );
@@ -20,7 +18,7 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 	fileIn.seekg( 0 );
 
 	if ( !quiet ) {
-		std::cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hash << " hash..." << std::endl;
+		std::cout << "Compiling wordlist " << wordlist << " into " << idxFile << " using the " << hashString << " hash..." << std::endl;
 
 		const unsigned short formatPower = getBytePower( fileSize );
 		const std::string fileSizeString = getFormatedSize( fileSize, formatPower );
@@ -29,49 +27,22 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 		progressBar.start();
 	}
 
-	for ( i = 0; i < numThreads; i++ ) {
-		threadReady[i] = false;
+	hasher = std::unique_ptr<HashLib>( HashLib::getHasher( hashString ) );
 
-		threads[i] = std::thread( computeHashes, &threadReady[i], &fileInMutex, &fileOutMutex, &fileIn, &fileOut, fileSize, std::unique_ptr<HashLib>( HashLib::getHasher( hash ) ), &progressBar );
-	}
-
-	for ( i = 0; i < numThreads; i++ )
-		threads[i].join();
-
-	fileIn.close();
-	fileOut.close();
-}
-
-void computeHashes( std::atomic<bool>* threadReady, std::mutex* fileInMutex, std::mutex* fileOutMutex, std::ifstream* fileIn, std::ofstream* fileOut, const std::streampos fileSize, std::unique_ptr<HashLib> hasher, ProgressBar* progressBar ) {
-	std::string line;
-	std::streampos pos;
-	FileArray::IndexEntry writeBuffer;
-	HashLib::Hash hash;
-
-	while ( true ) {
-		{
-			scoped_lock lock( *fileInMutex );
-
-			if ( fileIn->eof() )
-				break;
-
-			pos = fileIn->tellg();
-			getline( *fileIn, line );
-		}
-
-		progressBar->updateProgress( 0, pos, fileSize );
+	while ( !fileIn.eof() ) {
+		pos = fileIn.tellg();
+		getline( fileIn, line );
 
 		hash = hasher->hash( line );
 
 		writeBuffer.setHash( hash );
 		writeBuffer.setOffset( pos );
 
-		{
-			scoped_lock lock( *fileOutMutex );
+		fileOut.write( (char*)&writeBuffer, FileArray::IndexEntry::indexSize );
 
-			fileOut->write( (char*)&writeBuffer, FileArray::IndexEntry::indexSize );
-		}
+		progressBar.updateProgress( 0, pos, fileSize );
 	}
 
-	*threadReady = true;
+	fileIn.close();
+	fileOut.close();
 }

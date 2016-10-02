@@ -1,7 +1,7 @@
 #include "main.h"
 
 enum  optionIndex {
-	UNKNOWN, HELP, CREATE, VERIFY, LIST, QUIET, CORES, RAM
+	UNKNOWN, HELP, CREATE, VERIFY, LIST, QUIET, RAM
 };
 const option::Descriptor usage[] =
 {
@@ -18,7 +18,6 @@ const option::Descriptor usage[] =
 	{ VERIFY , 0, "v", "verify", option::Arg::None, "  --verify, -v   \tVerifies that the dictionary is sorted." },
 	{ LIST   , 0, "l", "list"  , option::Arg::None, "  --list  , -l   \tLists all available hashes separted by a space character." },
 	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  --quiet,  -q   \tDisables most output. Usefull for automated scripts.\n" },
-	{ CORES  , 0, "C", "cores" , Arg::ULong       , "  --cores,  -C   \tHow many cores to use when computing the hashes. (Only used when -c is set)." },
 	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  --ram,    -r   \tHow much RAM (MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
 	{ UNKNOWN, 0, "" ,  ""     , option::Arg::None, "\nExamples:\n"
 													"  crackstation -c words.txt words-sha512.idx sha512\n"
@@ -40,13 +39,12 @@ int main( int argc, char* argv[] ) {
 		 (!options[CREATE] && options[VERIFY] && !options[LIST] && (parse.nonOptionsCount() != 1)) ||
 		 (!options[CREATE] && !options[VERIFY] && !options[LIST] && (parse.nonOptionsCount() <= 3)) ||
 		 (options[LIST] && (parse.nonOptionsCount() != 0)) ) {
-		option::printUsage( std::cerr, usage );
+		option::printUsage( std::cerr, usage, ProgressBar::getConsoleWidth() );
 
 		return 0;
 	}
 
 	const bool quiet = options[QUIET];
-	const size_t cores = (options[CORES]) ? std::stoul( options[CORES].arg ) : 0;
 	const size_t ram = ((options[RAM]) ? std::stoul( options[RAM].arg ) : defaultRam) * MB;
 
 	if ( !quiet )
@@ -55,7 +53,7 @@ int main( int argc, char* argv[] ) {
 
 	try {
 		if ( options[CREATE] ) {
-			createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), cores, quiet );
+			createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), quiet );
 			//sortIDX( parse.nonOption( 1 ), ram, quiet );
 		}
 

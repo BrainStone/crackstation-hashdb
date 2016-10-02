@@ -22,6 +22,10 @@ public:
 	ProgressBar( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator = std::function<std::string( double )>() );
 	~ProgressBar();
 
+	static winsize getConsoleSize();
+	static unsigned short getConsoleHeight();
+	static unsigned short getConsoleWidth();
+
 	void init( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator = std::function<std::string( double )>() );
 	void start();
 	void finish( bool blocking = false );
@@ -40,10 +44,6 @@ private:
 	template<typename T>
 	static double div( const T& lhs, const T& rhs );
 	static std::string getPercentString( double progress, size_t width );
-
-	static winsize getConsoleSize();
-	static unsigned short getConsoleHeight();
-	static unsigned short getConsoleWidth();
 
 	bool initialized;
 	std::atomic<bool> isRunning;

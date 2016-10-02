@@ -1,14 +1,5 @@
 #include "util.h"
 
-size_t getNumCores() {
-	size_t out = std::thread::hardware_concurrency();
-
-	if ( out == 0 )
-		return 1;
-	else
-		return out;
-}
-
 unsigned short getBytePower( std::streampos size ) {
 	unsigned short power;
 

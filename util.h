@@ -7,10 +7,8 @@
 #include <iomanip>
 #include <iostream>
 #include <mutex>
-#include <stddef.h>
 #include <sstream>
 #include <string>
-#include <thread>
 
 #include "optionparser.h"
 
@@ -29,8 +27,6 @@ template<class T>
 constexpr unsigned char getNthByte( T var, size_t pos ) {
 	return (unsigned char)(var >> (pos * 8) & 0xFF);
 }
-
-size_t getNumCores();
 
 // Determines which byte postfix to use (0 = "B", 1 = "KiB", ...)
 unsigned short getBytePower( std::streampos size );
