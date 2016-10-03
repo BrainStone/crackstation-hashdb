@@ -3,15 +3,20 @@
 enum  optionIndex {
 	UNKNOWN, HELP, CREATE, VERIFY, LIST, QUIET, RAM
 };
+enum  programMode {
+	MODE_HELP, MODE_CREATE, MODE_CREATE_VERIFY, MODE_VERIFY, MODE_LIST, MODE_SEARCH
+};
 const option::Descriptor usage[] =
 {
 	{ UNKNOWN, 0, "" , ""      , option::Arg::None, "USAGE:\n"
 													"  Create dictionary:\n"
-													"    crackstation -c [-v] [-q] <wordlist> <dictionary> <hashtype>\n\n"
+	                                                "    crackstation -c [-v] [-r <Cache Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
 													"  Find hash in dictionary:\n"
 													"    crackstation [-q] <wordlist> <dictionary> <hashtype> <hashes>...\n\n"
 													"  Verify dictionary:\n"
-													"    crackstation -v [-q] <dictionary>\n\n\n"
+													"    crackstation -v [-q] [wordlist] <dictionary> [hashtype]\n\n"
+													"  List available hashes:\n"
+													"    crackstation -l\n\n\n"
 													"Options:" },
 	{ HELP   , 0, "h", "help"  , option::Arg::None, "  -h, --help,    \tPrint usage and exit." },
 	{ CREATE , 0, "c", "create", option::Arg::None, "  -c, --create   \tCreates the dictionary from the wordlist." },
@@ -34,11 +39,28 @@ int main( int argc, char* argv[] ) {
 	if ( parse.error() )
 		return 1;
 
-	if ( options[HELP] ||
-		(options[CREATE] && !options[LIST] && (parse.nonOptionsCount() != 3)) ||
-		 (!options[CREATE] && options[VERIFY] && !options[LIST] && (parse.nonOptionsCount() != 1)) ||
-		 (!options[CREATE] && !options[VERIFY] && !options[LIST] && (parse.nonOptionsCount() <= 3)) ||
-		 (options[LIST] && (parse.nonOptionsCount() != 0)) ) {
+	programMode mode;
+	const size_t nonOptions = parse.nonOptionsCount();
+
+	if ( options[HELP] )
+		mode = MODE_HELP;
+	else if ( options[CREATE] )
+		if ( options[VERIFY] )
+			mode = MODE_CREATE_VERIFY;
+		else
+			mode = MODE_CREATE;
+	else if ( options[VERIFY] )
+		mode = MODE_VERIFY;
+	else if ( options[LIST] )
+		mode = MODE_LIST;
+	else
+		mode = MODE_SEARCH;
+
+	if ( (mode == MODE_HELP) ||
+		(((mode == MODE_CREATE) || (mode == MODE_CREATE_VERIFY)) && (nonOptions != 3)) ||
+		 ((mode == MODE_VERIFY) && ((nonOptions != 1) && (nonOptions != 3))) ||
+		 ((mode == MODE_LIST) && (nonOptions != 0)) ||
+		 ((mode == MODE_SEARCH) && (nonOptions <= 3)) ) {
 		option::printUsage( std::cerr, usage, ProgressBar::getConsoleWidth() );
 
 		return 0;
@@ -52,18 +74,22 @@ int main( int argc, char* argv[] ) {
 			std::cout << "Unknown option: " << opt->name << "\n";
 
 	try {
-		if ( options[CREATE] ) {
+		if ( (mode == MODE_CREATE) || (mode == MODE_CREATE_VERIFY) ) {
 			createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), quiet );
 			//sortIDX( parse.nonOption( 1 ), ram, quiet );
 		}
 
-		if ( options[VERIFY] ) {
+		if ( (mode == MODE_VERIFY) || (mode == MODE_CREATE_VERIFY) ) {
 			// Just for testing....
-			sortIDX( parse.nonOption( 0 + (bool)options[CREATE] ), ram, quiet );
+			sortIDX( parse.nonOption( (nonOptions == 1) ? 0 : 1 ), ram, quiet );
 		}
 
-		if ( options[LIST] ) {
+		if ( mode == MODE_LIST ) {
 			std::cout << HashLib::getHashesStr() << std::endl;
+		}
+
+		if ( mode == MODE_SEARCH ) {
+			// Do a search
 		}
 	} catch ( const std::invalid_argument & e ) {
 		std::cerr << e.what() << std::endl;
