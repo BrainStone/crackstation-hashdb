@@ -8,7 +8,7 @@ enum  programMode {
 };
 const option::Descriptor usage[] =
 {
-	{ UNKNOWN, 0, "" , ""      , option::Arg::None, "USAGE:\n"
+	{ UNKNOWN, 0, "" , ""      , option::Arg::None, "Usage:\n"
 													"  Create dictionary:\n"
 	                                                "    crackstation -c [-v] [-r <Cache Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
 													"  Find hash in dictionary:\n"
@@ -22,7 +22,7 @@ const option::Descriptor usage[] =
 	{ CREATE , 0, "c", "create", option::Arg::None, "  -c, --create   \tCreates the dictionary from the wordlist." },
 	{ VERIFY , 0, "v", "verify", option::Arg::None, "  -v, --verify   \tVerifies that the dictionary is sorted." },
 	{ LIST   , 0, "l", "list"  , option::Arg::None, "  -l, --list     \tLists all available hashes separted by a space character." },
-	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  -q, --quiet    \tDisables most output. Usefull for automated scripts.\n" },
+	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  -q, --quiet    \tDisables most output. Usefull for automated scripts." },
 	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  -r, --ram      \tHow much RAM (MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
 	{ UNKNOWN, 0, "" ,  ""     , option::Arg::None, "\nExamples:\n"
 													"  crackstation -c words.txt words-sha512.idx sha512\n"
