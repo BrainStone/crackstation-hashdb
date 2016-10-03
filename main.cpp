@@ -10,7 +10,7 @@ const option::Descriptor usage[] =
 {
 	{ UNKNOWN, 0, "" , ""      , option::Arg::None, "Usage:\n"
 													"  Create dictionary:\n"
-	                                                "    crackstation -c [-v] [-r <Cache Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
+													"    crackstation -c [-v] [-r <Cache Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
 													"  Find hash in dictionary:\n"
 													"    crackstation [-q] <wordlist> <dictionary> <hashtype> <hashes>...\n\n"
 													"  Verify dictionary:\n"
@@ -56,14 +56,11 @@ int main( int argc, char* argv[] ) {
 	else
 		mode = MODE_SEARCH;
 
-	if ( (mode == MODE_HELP) ||
-		(((mode == MODE_CREATE) || (mode == MODE_CREATE_VERIFY)) && (nonOptions != 3)) ||
-		 ((mode == MODE_VERIFY) && ((nonOptions != 1) && (nonOptions != 3))) ||
+	if ( (((mode == MODE_CREATE) || (mode == MODE_CREATE_VERIFY)) && (nonOptions != 3)) ||
+		((mode == MODE_VERIFY) && ((nonOptions != 1) && (nonOptions != 3))) ||
 		 ((mode == MODE_LIST) && (nonOptions != 0)) ||
 		 ((mode == MODE_SEARCH) && (nonOptions <= 3)) ) {
-		option::printUsage( std::cerr, usage, ProgressBar::getConsoleWidth() );
-
-		return 0;
+		mode = MODE_HELP;
 	}
 
 	const bool quiet = options[QUIET];
@@ -74,6 +71,10 @@ int main( int argc, char* argv[] ) {
 			std::cout << "Unknown option: " << opt->name << "\n";
 
 	try {
+		if ( mode == MODE_HELP ) {
+			option::printUsage( std::cerr, usage, ProgressBar::getConsoleWidth() );
+		}
+
 		if ( (mode == MODE_CREATE) || (mode == MODE_CREATE_VERIFY) ) {
 			createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), quiet );
 			//sortIDX( parse.nonOption( 1 ), ram, quiet );
@@ -96,4 +97,6 @@ int main( int argc, char* argv[] ) {
 
 		return 1;
 	}
+
+	return 0;
 }
