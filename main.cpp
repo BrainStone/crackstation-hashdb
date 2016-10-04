@@ -10,7 +10,7 @@ const option::Descriptor usage[] =
 {
 	{ UNKNOWN, 0, "" , ""      , option::Arg::None, "Usage:\n"
 													"  Create dictionary:\n"
-													"    crackstation -c [-v] [-r <Cache Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
+													"    crackstation -c [-v] [-r <Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
 													"  Find hash in dictionary:\n"
 													"    crackstation [-q] <wordlist> <dictionary> <hashtype> <hashes>...\n\n"
 													"  Verify dictionary:\n"
@@ -18,12 +18,12 @@ const option::Descriptor usage[] =
 													"  List available hashes:\n"
 													"    crackstation -l\n\n\n"
 													"Options:" },
-	{ HELP   , 0, "h", "help"  , option::Arg::None, "  -h, --help,    \tPrint usage and exit." },
-	{ CREATE , 0, "c", "create", option::Arg::None, "  -c, --create   \tCreates the dictionary from the wordlist." },
-	{ VERIFY , 0, "v", "verify", option::Arg::None, "  -v, --verify   \tVerifies that the dictionary is sorted." },
-	{ LIST   , 0, "l", "list"  , option::Arg::None, "  -l, --list     \tLists all available hashes separted by a space character." },
-	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  -q, --quiet    \tDisables most output. Usefull for automated scripts." },
-	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  -r, --ram      \tHow much RAM (MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
+	{ HELP   , 0, "h", "help"  , option::Arg::None, "  -h, --help,     \tPrint usage and exit." },
+	{ CREATE , 0, "c", "create", option::Arg::None, "  -c, --create    \tCreates the dictionary from the wordlist." },
+	{ VERIFY , 0, "v", "verify", option::Arg::None, "  -v, --verify    \tVerifies that the dictionary is sorted." },
+	{ LIST   , 0, "l", "list"  , option::Arg::None, "  -l, --list      \tLists all available hashes separted by a space character." },
+	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  -q, --quiet     \tDisables most output. Usefull for automated scripts." },
+	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  -r, --ram=SIZE  \tHow much RAM (SIZE MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
 	{ UNKNOWN, 0, "" ,  ""     , option::Arg::None, "\nExamples:\n"
 													"  crackstation -c words.txt words-sha512.idx sha512\n"
 													"  crackstation words.txt words-md5.idx md5 827ccb0eea8a706c4c34a16891f84e7b\n" },
@@ -37,7 +37,7 @@ int main( int argc, char* argv[] ) {
 	option::Parser parse( usage, argc, argv, options, buffer );
 
 	if ( parse.error() )
-		return 1;
+		return 2;
 
 	programMode mode;
 	const size_t nonOptions = parse.nonOptionsCount();
