@@ -123,12 +123,6 @@ By default this program is very verbose displaying progressbars and similar
 whenever it makes sense. To disable this behavior for example to use it with
 automated scripts simply add the `-q` flag.
 
-Credits
--------
-
-The password list used as an example is from
-http://www.whatsmypass.com/the-top-500-worst-passwords-of-all-time
-
 TODOs
 -----
 
@@ -144,3 +138,9 @@ Helping
 
 At the moment you can mainly help out by implementing more hashing algorithms.
 Please only use libraries that are installed by default or OpenSSL.
+
+Credits
+-------
+
+The password list used as an example is from
+http://www.whatsmypass.com/the-top-500-worst-passwords-of-all-time
