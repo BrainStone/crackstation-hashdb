@@ -38,8 +38,12 @@ This allows the user to only having to use one program.
 Building and Testing
 --------------------
 
-To create the binary run `make`. You can install it by running `sudo make
-install`.
+To create the binary run `make`. Make sure you have `libssl-dev` installed. If
+not simply install it by running `sudo apt-get install libssl-dev` (or similar
+depending on your distributuion or OS). Also make sure to have at least `gcc` 4
+installed.  
+You can install this program by running `sudo make install`. This allows the
+programm being used system wide and without the `./` in the front.
 
 To run the tests, just run `make test`, and then clean up the files the tests
 created with `make testclean`.
