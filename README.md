@@ -128,3 +128,19 @@ Credits
 
 The password list used as an example is from
 http://www.whatsmypass.com/the-top-500-worst-passwords-of-all-time
+
+TODOs
+-----
+
+* Implement a faster sorting algorithm.
+* Implement index file verification
+* Add more hashes
+
+After the completion of these tasks a pull request to the main repo will be
+made.
+
+Helping
+-------
+
+At the moment you can mainly help out by implementing more hashing algorithms.
+Please only use libraries that are installed by default or OpenSSL.
