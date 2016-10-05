@@ -11,9 +11,8 @@ void createIDX( const std::string & wordlist, const std::string & idxFile, const
 	FileArray::IndexEntry writeBuffer;
 	HashLib::Hash hash;
 
-	if ( !fileIn.good() ) {
+	if ( !fileIn.good() )
 		throw std::invalid_argument( "File \"" + wordlist + "\" does not exist!" );
-	}
 
 	fileIn.seekg( 0 );
 

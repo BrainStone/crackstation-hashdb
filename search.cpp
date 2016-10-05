@@ -19,6 +19,9 @@ std::vector<Match> Match::getMatches( const std::string & wordlist, const std::s
 	std::ifstream fileIn( wordlist, std::ios::in );
 	std::string line;
 
+	if ( !fileIn.good() )
+		throw std::invalid_argument( "File \"" + wordlist + "\" does not exist!" );
+
 	hash.fromString( hashString );
 	const size_t hashSize( hash.getLength() );
 	searchElement.setHash( hash );
