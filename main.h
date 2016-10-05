@@ -8,6 +8,7 @@
 #include "createidx.h"
 #include "optionparser.h"
 #include "progressbar.h"
+#include "search.h"
 #include "sortidx.h"
 #include "util.h"
 

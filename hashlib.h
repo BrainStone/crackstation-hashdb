@@ -15,12 +15,11 @@
 
 class HashLib {
 public:
-	typedef unsigned char byte;
 	typedef std::vector<byte>::size_type size_type;
 
 	class Hash;
 
-	static HashLib * getHasher( const std::string & hashName );
+	static HashLib * getHasher( std::string hashName );
 	static const std::vector<std::string> & getHashes();
 	static std::string getHashesStr( const std::string & delim = " " );
 
@@ -43,10 +42,16 @@ public:
 	byte getNthByte( size_type index ) const;
 	size_type getLength() const;
 
+	std::string toString() const;
+	void fromString( std::string str );
+	bool partialMatch( const Hash &lhs ) const;
+
 	Hash & operator=( const Hash & lhs );
 	bool operator==( const Hash &lhs ) const;
 	bool operator!=( const Hash &lhs ) const;
 	byte operator[]( size_type index ) const;
+
+	friend std::ostream & operator<<( std::ostream & rhs, const Hash & lhs );
 private:
 	std::vector<byte> bytes;
 };

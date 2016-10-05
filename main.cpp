@@ -76,13 +76,19 @@ int main( int argc, char* argv[] ) {
 		}
 
 		if ( (mode == MODE_CREATE) || (mode == MODE_CREATE_VERIFY) ) {
-			createIDX( parse.nonOption( 0 ), parse.nonOption( 1 ), parse.nonOption( 2 ), quiet );
-			//sortIDX( parse.nonOption( 1 ), ram, quiet );
+			const std::string wordlist( parse.nonOption( 0 ) );
+			const std::string idxFile( parse.nonOption( 1 ) );
+			const std::string hashName( parse.nonOption( 2 ) );
+
+			createIDX( wordlist, idxFile, hashName, quiet );
+			//sortIDX(idxFile, ram, quiet );
 		}
 
 		if ( (mode == MODE_VERIFY) || (mode == MODE_CREATE_VERIFY) ) {
+			const std::string idxFile( parse.nonOption( (nonOptions == 1) ? 0 : 1 ) );
+
 			// Just for testing....
-			sortIDX( parse.nonOption( (nonOptions == 1) ? 0 : 1 ), ram, quiet );
+			sortIDX( idxFile, ram, quiet );
 		}
 
 		if ( mode == MODE_LIST ) {
@@ -90,7 +96,26 @@ int main( int argc, char* argv[] ) {
 		}
 
 		if ( mode == MODE_SEARCH ) {
-			// Do a search
+			const std::string wordlist( parse.nonOption( 0 ) );
+			const std::string idxFile( parse.nonOption( 1 ) );
+			const std::string hashName( parse.nonOption( 2 ) );
+			std::string hash;
+			std::vector<Match> matches;
+
+			for ( size_t i = 3; i < nonOptions; i++ ) {
+				hash = parse.nonOption( i );
+				matches = Match::getMatches( wordlist, idxFile, hashName, hash );
+
+				if ( !quiet )
+					std::cout << "Matches for hash " << hash << ":\n";
+
+				if ( !matches.empty() )
+					std::cout << join( matches, "\n" ) << (quiet ? "\n" : "\n\n");
+				else if ( !quiet )
+					std::cout << "\33[1;30m\tnone\33[0m\n\n";
+
+				std::cout.flush();
+			}
 		}
 	} catch ( const std::invalid_argument & e ) {
 		std::cerr << e.what() << std::endl;

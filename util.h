@@ -17,6 +17,7 @@ constexpr size_t MB = 1024 * 1024;
 
 // Typedefs & Structs
 typedef std::lock_guard<std::mutex> scoped_lock;
+typedef unsigned char byte;
 
 // Functions
 /**
@@ -40,8 +41,11 @@ struct Arg : public option::Arg {
 	static option::ArgStatus ULong( const option::Option& option, bool msg );
 };
 
+std::string & strToLower( std::string & s );
 std::string & removeChars( std::string & s, const std::string& chars );
+std::string & keepChars( std::string & s, const std::string& chars );
 std::string centerString( size_t width, const std::string& str );
+byte hexCharToByte( char c );
 
 template <typename T>
 std::string join( const T & v, const std::string & delim ) {

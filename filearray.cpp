@@ -103,6 +103,16 @@ void FileArray::IndexEntry::setOffset( std::streampos pos ) {
 	}
 }
 
+std::streampos FileArray::IndexEntry::getOffset() const {
+	std::streampos pos = 0;
+
+	for ( size_t i = 0; i < FileArray::IndexEntry::offsetSize; i++ ) {
+		pos = (pos << 8) | offset[FileArray::IndexEntry::offsetSize - i - 1];
+	}
+
+	return pos;
+}
+
 FileArray::IndexEntry& FileArray::IndexEntry::operator=( const FileArray::IndexEntry & copy ) {
 	FileArray::posType i;
 

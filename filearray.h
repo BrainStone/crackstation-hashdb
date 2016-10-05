@@ -20,7 +20,7 @@ public:
 	FileArray( const std::string &fileName, bool autoLoad = true );
 	FileArray( const std::string &fileName, posType cacheSize, bool autoLoad = true );
 	FileArray( const std::string &fileName, ProgressBar* progressBar, bool autoLoad = true );
-	FileArray( const std::string &fileName, posType cacheSizee, ProgressBar* progressBar, bool autoLoad = true );
+	FileArray( const std::string &fileName, posType cacheSize, ProgressBar* progressBar, bool autoLoad = true );
 	~FileArray();
 
 	posType getFileSize() const;
@@ -56,6 +56,8 @@ struct FileArray::IndexEntry {
 
 	void setHash( const HashLib::Hash & hashSource );
 	void setOffset( std::streampos pos );
+
+	std::streampos getOffset() const;
 
 	IndexEntry& operator=( const IndexEntry & copy );
 
