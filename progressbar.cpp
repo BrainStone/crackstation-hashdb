@@ -179,7 +179,7 @@ std::ostream & operator<<( std::ostream & os, ProgressBar::duration dSeconds ) {
 	dSeconds -= duration_cast<ProgressBar::duration>(dMinutes);
 
 	if ( dDays.count() > 0 )
-		os << std::setw( 2 ) << std::fixed << dDays.count() << 'd';
+		os << std::fixed << std::setw( 2 ) << dDays.count() << 'd';
 
 	os << std::fixed << std::setw( 2 ) << std::setfill( '0' ) << dHours.count() << ':'
 		<< std::fixed << std::setw( 2 ) << std::setfill( '0' ) << dMinutes.count() << ':'
