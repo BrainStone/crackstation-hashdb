@@ -18,6 +18,9 @@
 
 class ProgressBar {
 public:
+	typedef std::chrono::high_resolution_clock HRC;
+	typedef std::chrono::duration<double> duration;
+
 	ProgressBar();
 	ProgressBar( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator = std::function<std::string( double )>() );
 	~ProgressBar();
@@ -36,9 +39,6 @@ public:
 	int getNumSegments();
 
 private:
-	typedef std::chrono::high_resolution_clock HRC;
-	typedef std::chrono::duration<double> duration;
-
 	static constexpr long long defaultTimeout = 100;
 
 	template<typename T>
@@ -62,5 +62,7 @@ private:
 	double getTotalProgress();
 	const std::string & getActiveSegment();
 };
+
+std::ostream & operator<<( std::ostream & os, ProgressBar::duration dSeconds );
 
 #endif

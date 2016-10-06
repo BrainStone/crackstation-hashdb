@@ -138,8 +138,7 @@ void ProgressBar::renderBar( double progress ) {
 
 	std::cout << "\33[u\33[2A\33[K" << centerString( barWidth, "===== " + getActiveSegment() + " =====" ) << '\n';
 	std::cout << "\33[K\33[7m" << percentString.substr( 0, splitPos ) << "\33[0m" << percentString.substr( splitPos ) << '\n';
-	std::cout << "\33[s\33[KTime elapsed: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeElapsed.count()
-		<< "s\tTime remaining: " << std::setw( 7 ) << std::fixed << std::setprecision( 1 ) << timeRemaining.count() << "s";
+	std::cout << "\33[s\33[KTime elapsed: " << timeElapsed << "\tTime remaining: " << timeRemaining;
 
 	if ( extraDataGenerator )
 		std::cout << "\t" << extraDataGenerator( progress );
@@ -162,4 +161,29 @@ const std::string & ProgressBar::getActiveSegment() {
 	scoped_lock lock( segmentsMutex );
 
 	return segmentNames[activeSegment];
+}
+
+std::ostream & operator<<( std::ostream & os, ProgressBar::duration dSeconds ) {
+	typedef std::chrono::duration<int, std::ratio<24 * 3600>> days;
+	using std::chrono::hours;
+	using std::chrono::minutes;
+	using std::chrono::duration_cast;
+
+	days dDays = duration_cast<days>(dSeconds);
+	dSeconds -= duration_cast<ProgressBar::duration>(dDays);
+
+	hours dHours = duration_cast<hours>(dSeconds);
+	dSeconds -= duration_cast<ProgressBar::duration>(dHours);
+
+	minutes dMinutes = duration_cast<minutes>(dSeconds);
+	dSeconds -= duration_cast<ProgressBar::duration>(dMinutes);
+
+	if ( dDays.count() > 0 )
+		os << std::setw( 2 ) << std::fixed << dDays.count() << 'd';
+
+	os << std::fixed << std::setw( 2 ) << std::setfill( '0' ) << dHours.count() << ':'
+		<< std::fixed << std::setw( 2 ) << std::setfill( '0' ) << dMinutes.count() << ':'
+		<< std::fixed << std::setw( 4 ) << std::setfill( '0' ) << std::setprecision( 1 ) << dSeconds.count();
+
+	return os;
 }
