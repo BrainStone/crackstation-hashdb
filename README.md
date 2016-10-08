@@ -77,6 +77,11 @@ mode. Simply run it like this:
     
 You can supply as many hashes to cracked as you wish.
 
+You can also use a file containing the hashes speparated by newlines or other
+whitespace characters like this:
+
+    $ ./crackstation words.txt words-md5.idx md5 $(cat hashes.txt)
+
 Adding Words
 ------------
 
