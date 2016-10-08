@@ -26,7 +26,7 @@ const option::Descriptor usage[] =
 	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  -r, --ram=SIZE  \tHow much RAM (SIZE MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
 	{ UNKNOWN, 0, "" ,  ""     , option::Arg::None, "\nExamples:\n"
 													"  crackstation -c words.txt words-sha512.idx sha512\n"
-													"  crackstation words.txt words-md5.idx md5 827ccb0eea8a706c4c34a16891f84e7b\n" },
+													"  crackstation words.txt words-md5.idx md5 827CCB0EEA8A706C4C34A16891F84E7b\n" },
 	{ 0,0,0,0,0,0 }
 };
 

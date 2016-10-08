@@ -2,6 +2,8 @@
 #define CRACKSTATION_HASHLIB_H
 
 #include <algorithm>
+#include <cstring>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -23,7 +25,9 @@ public:
 	static const std::vector<std::string> & getHashes();
 	static std::string getHashesStr( const std::string & delim = " " );
 
-	virtual Hash hash( const std::string & stringToHash ) = 0;
+	virtual Hash hash( const char * stringToHash );
+	virtual Hash hash( const std::string & stringToHash );
+	virtual Hash hash( const byte * stringToHash, size_t strSize ) = 0;
 	virtual size_type getLength() = 0;
 
 protected:
@@ -57,9 +61,10 @@ private:
 };
 
 // Hashing algorithms:
-class HashMD4 final : public HashLib {
+class HashMD4 : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -69,9 +74,10 @@ private:
 	byte hashStorage[length];
 };
 
-class HashMD5 final : public HashLib {
+class HashMD5 : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -81,9 +87,10 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA1 final : public HashLib {
+class HashSHA1 : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -93,9 +100,10 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA224 final : public HashLib {
+class HashSHA224 : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -105,9 +113,10 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA256 final : public HashLib {
+class HashSHA256 : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -117,9 +126,10 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA384 final : public HashLib {
+class HashSHA384 : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -129,9 +139,10 @@ private:
 	byte hashStorage[length];
 };
 
-class HashSHA512 final : public HashLib {
+class HashSHA512 : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -141,9 +152,10 @@ private:
 	byte hashStorage[length];
 };
 
-class HashMySQL41 final : public HashLib {
+class HashMySQL41 : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -154,9 +166,10 @@ private:
 	byte hashStorage2[length];
 };
 
-class HashWhirlpool final : public HashLib {
+class HashWhirlpool : public HashLib {
 public:
-	virtual Hash hash( const std::string & stringToHash );
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 	virtual size_type getLength();
 
 protected:
@@ -164,6 +177,12 @@ protected:
 
 private:
 	byte hashStorage[length];
+};
+
+class HashNTLM : public HashMD4 {
+public:
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
 };
 
 #endif

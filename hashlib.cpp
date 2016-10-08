@@ -1,6 +1,6 @@
 #include "hashlib.h"
 
-std::vector<std::string> HashLib::hashes( { "MD4", "MD5", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "MySQL4.1+", "Whirlpool" } );
+std::vector<std::string> HashLib::hashes( { "MD4", "MD5", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "MySQL4.1+", "Whirlpool", "NTLM" } );
 
 HashLib * HashLib::getHasher( std::string hashName ) {
 	removeChars( hashName, "-+., " );
@@ -24,6 +24,8 @@ HashLib * HashLib::getHasher( std::string hashName ) {
 		return new HashMySQL41();
 	} else if ( hashName == "whirlpool" ) {
 		return new HashWhirlpool();
+	} else if ( hashName == "ntlm" ) {
+		return new HashNTLM();
 	} else {
 		throw std::invalid_argument( "The hash type \"" + hashName + "\" is unknown!" );
 	}
@@ -35,6 +37,14 @@ const std::vector<std::string>& HashLib::getHashes() {
 
 std::string HashLib::getHashesStr( const std::string & delim ) {
 	return join( hashes, delim );
+}
+
+HashLib::Hash HashLib::hash( const char * stringToHash ) {
+	return hash( reinterpret_cast<const byte *>(stringToHash), strlen( stringToHash ) );
+}
+
+HashLib::Hash HashLib::hash( const std::string & stringToHash ) {
+	return hash( reinterpret_cast<const byte *>(stringToHash.c_str()), stringToHash.length() );
 }
 
 HashLib::Hash::Hash() {}
@@ -56,9 +66,10 @@ HashLib::size_type HashLib::Hash::getLength() const {
 
 std::string HashLib::Hash::toString() const {
 	std::ostringstream sstr;
+	sstr << std::hex << std::uppercase << std::setfill( '0' );
 
 	for ( const byte & byteToWrite : bytes ) {
-		sstr << std::fixed << std::setprecision( 2 ) << std::hex << (int)byteToWrite;
+		sstr << std::setw( 2 ) << (int)byteToWrite;
 	}
 
 	return sstr.str();
@@ -112,8 +123,8 @@ std::ostream & operator<<( std::ostream & rhs, const HashLib::Hash & lhs ) {
 
 // Hashing algorithms:
 // MD4
-HashLib::Hash HashMD4::hash( const std::string & stringToHash ) {
-	MD4( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashMD4::hash( const byte * stringToHash, size_t strSize ) {
+	MD4( stringToHash, strSize, hashStorage );
 
 	return HashLib::Hash( hashStorage, length );
 }
@@ -123,8 +134,8 @@ HashLib::size_type HashMD4::getLength() {
 }
 
 // MD5
-HashLib::Hash HashMD5::hash( const std::string & stringToHash ) {
-	MD5( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashMD5::hash( const byte * stringToHash, size_t strSize ) {
+	MD5( stringToHash, strSize, hashStorage );
 
 	return HashLib::Hash( hashStorage, length );
 }
@@ -134,8 +145,8 @@ HashLib::size_type HashMD5::getLength() {
 }
 
 // SHA-1
-HashLib::Hash HashSHA1::hash( const std::string & stringToHash ) {
-	SHA1( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashSHA1::hash( const byte * stringToHash, size_t strSize ) {
+	SHA1( stringToHash, strSize, hashStorage );
 
 	return HashLib::Hash( hashStorage, length );
 }
@@ -145,8 +156,8 @@ HashLib::size_type HashSHA1::getLength() {
 }
 
 // SHA-224
-HashLib::Hash HashSHA224::hash( const std::string & stringToHash ) {
-	SHA224( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashSHA224::hash( const byte * stringToHash, size_t strSize ) {
+	SHA224( stringToHash, strSize, hashStorage );
 
 	return HashLib::Hash( hashStorage, length );
 }
@@ -156,8 +167,8 @@ HashLib::size_type HashSHA224::getLength() {
 }
 
 // SHA-256
-HashLib::Hash HashSHA256::hash( const std::string & stringToHash ) {
-	SHA256( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashSHA256::hash( const byte * stringToHash, size_t strSize ) {
+	SHA256( stringToHash, strSize, hashStorage );
 
 	return HashLib::Hash( hashStorage, length );
 }
@@ -167,8 +178,8 @@ HashLib::size_type HashSHA256::getLength() {
 }
 
 // SHA-384
-HashLib::Hash HashSHA384::hash( const std::string & stringToHash ) {
-	SHA384( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashSHA384::hash( const byte * stringToHash, size_t strSize ) {
+	SHA384( stringToHash, strSize, hashStorage );
 
 	return HashLib::Hash( hashStorage, length );
 }
@@ -178,8 +189,8 @@ HashLib::size_type HashSHA384::getLength() {
 }
 
 // SHA-512
-HashLib::Hash HashSHA512::hash( const std::string & stringToHash ) {
-	SHA512( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashSHA512::hash( const byte * stringToHash, size_t strSize ) {
+	SHA512( stringToHash, strSize, hashStorage );
 
 	return HashLib::Hash( hashStorage, length );
 }
@@ -189,8 +200,8 @@ HashLib::size_type HashSHA512::getLength() {
 }
 
 // MySQL4.1+
-HashLib::Hash HashMySQL41::hash( const std::string & stringToHash ) {
-	SHA1( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashMySQL41::hash( const byte * stringToHash, size_t strSize ) {
+	SHA1( stringToHash, strSize, hashStorage );
 	SHA1( hashStorage, length, hashStorage2 );
 
 	return HashLib::Hash( hashStorage2, length );
@@ -201,12 +212,25 @@ HashLib::size_type HashMySQL41::getLength() {
 }
 
 // Whirlpool
-HashLib::Hash HashWhirlpool::hash( const std::string & stringToHash ) {
-	WHIRLPOOL( reinterpret_cast<const byte*>(stringToHash.c_str()), stringToHash.length(), hashStorage );
+HashLib::Hash HashWhirlpool::hash( const byte * stringToHash, size_t strSize ) {
+	WHIRLPOOL( stringToHash, strSize, hashStorage );
 
 	return HashLib::Hash( hashStorage, length );
 }
 
 HashLib::size_type HashWhirlpool::getLength() {
 	return length;
+}
+
+// NTLM
+HashLib::Hash HashNTLM::hash( const byte * stringToHash, size_t strSize ) {
+	// Using smart pointer to enable RAII
+	std::unique_ptr<byte[]> paddedString( new byte[strSize * 2] );
+
+	std::fill_n( paddedString.get(), strSize * 2, '\0' );
+
+	for ( size_t i = 0; i < strSize; i++ )
+		paddedString[2 * i] = stringToHash[i];
+
+	return HashMD4::hash( paddedString.get(), strSize * 2 );
 }
