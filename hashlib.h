@@ -2,6 +2,7 @@
 #define CRACKSTATION_HASHLIB_H
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <memory>
 #include <stdexcept>
