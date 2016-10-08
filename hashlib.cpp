@@ -1,6 +1,6 @@
 #include "hashlib.h"
 
-std::vector<std::string> HashLib::hashes( { "MD4", "MD5", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "MySQL4.1+", "Whirlpool", "LM", "NTLM" } );
+std::vector<std::string> HashLib::hashes( { "MD4", "MD5", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "MySQL4.1+", "RIPEMD-160", "Whirlpool", "LM", "NTLM" } );
 
 HashLib * HashLib::getHasher( std::string hashName ) {
 	removeChars( hashName, "-+., " );
@@ -22,6 +22,8 @@ HashLib * HashLib::getHasher( std::string hashName ) {
 		return new HashSHA512();
 	} else if ( (hashName == "mysql41") || (hashName == "mysql") ) {
 		return new HashMySQL41();
+	} else if ( (hashName == "ripemd160") || (hashName == "ripemd") ) {
+		return new HashRIPEMD160();
 	} else if ( hashName == "whirlpool" ) {
 		return new HashWhirlpool();
 	} else if ( hashName == "lm" ) {
@@ -210,6 +212,17 @@ HashLib::Hash HashMySQL41::hash( const byte * stringToHash, size_t strSize ) {
 }
 
 HashLib::size_type HashMySQL41::getLength() {
+	return length;
+}
+
+// RIPEMD-160
+HashLib::Hash HashRIPEMD160::hash( const byte * stringToHash, size_t strSize ) {
+	RIPEMD160( stringToHash, strSize, hashStorage );
+
+	return HashLib::Hash( hashStorage, length );
+}
+
+HashLib::size_type HashRIPEMD160::getLength() {
 	return length;
 }
 

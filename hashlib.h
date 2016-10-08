@@ -12,6 +12,7 @@
 #include <openssl/des.h>
 #include <openssl/md4.h>
 #include <openssl/md5.h>
+#include <openssl/ripemd.h>
 #include <openssl/sha.h>
 #include <openssl/whrlpool.h>
 
@@ -166,6 +167,19 @@ protected:
 private:
 	byte hashStorage[length];
 	byte hashStorage2[length];
+};
+
+class HashRIPEMD160 : public HashLib {
+public:
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
+	virtual size_type getLength();
+
+protected:
+	static constexpr size_type length = RIPEMD160_DIGEST_LENGTH;
+
+private:
+	byte hashStorage[length];
 };
 
 class HashWhirlpool : public HashLib {
