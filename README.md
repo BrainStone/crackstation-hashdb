@@ -31,7 +31,7 @@ The main program has two several modes:
 
 4. *Printing a list of supported hashes*  
    The programm prints a simple space separted list of all available hashes.  
-   *(Feel free to create pull request implementing more hashes)*
+   *(Feel free to create pull requests implementing more hashes)*
 
 This allows the user to only having to use one program.
 
@@ -56,12 +56,13 @@ like to index it for MD5 and SHA1 cracking.
 
 Simply run these commands:
 
-    $ ./crackstation -c r 256 words.txt words-md5.idx md5
-    $ ./crackstation -c r 256 words.txt words-sha1.idx sha1
+    $ ./crackstation -c -r 256 words.txt words-md5.idx md5
+    $ ./crackstation -c -r 256 words.txt words-sha1.idx sha1
 
-The `-r` parameter is the maximum amount of memory sortidx is allowed to use in
-MiB. The more memory you let it use, the faster it will go. Give it as much as
-your system will allow. 256 MiB is the default value.  
+The `-r` parameter is the maximum amount of memory `crackstation` is allowed to
+use in MiB for sorting the index. The more memory you let it use, the faster it
+will go. Give it as much as your system will allow. 256 MiB is the default
+value.  
 Use the `-q` flag in order to disable the progressbar.
 
 You now have everything you need to crack MD5 and SHA1 hashes quickly.
@@ -117,8 +118,8 @@ generate a message explaining all parameters and flags similar to the following:
       -v, --verify    Verifies that the dictionary is sorted.
       -l, --list      Lists all available hashes separted by a space character.
       -q, --quiet     Disables most output. Usefull for automated scripts.
-      -r, --ram=SIZE  How much RAM (SIZE MiB) to use for the cache when sorting the
-                      index file. (Only used when -c is set).
+      -r, --ram=SIZE  How much RAM (SIZE MiB) to use for the cache when sorting
+                      the index file. (Only used when -c is set).
     
     Examples:
       crackstation -c words.txt words-sha512.idx sha512
