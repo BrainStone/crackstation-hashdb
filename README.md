@@ -72,8 +72,8 @@ Cracking Hashes
 Once you have generated and sorted the index, you can use the program in lookup
 mode. Simply run it like this:
 
-    $ ./crackstation words.txt words-md5.idx md5 098f6bcd4621d373cade4e832627b4f6 202cb962ac59075b964b07152d234b70
-    $ ./crackstation words.txt words-sha1.idx sha1 a94a8fe5ccb19ba61c4c0873d391e987982fbbd3 40bd001563085fc35165329ea1ff5c5ecbdbbeef
+    $ ./crackstation words.txt words-md5.idx md5 098F6BCD4621D373CADE4E832627B4F6 202CB962AC59075B964B07152D234B70
+    $ ./crackstation words.txt words-sha1.idx sha1 A94A8FE5CCB19BA61C4C0873D391E987982FBBD3 40BD001563085FC35165329EA1FF5C5ECBDBBEEF
     
 You can supply as many hashes to cracked as you wish.
 
@@ -117,7 +117,7 @@ generate a message explaining all parameters and flags similar to the following:
     
     Examples:
       crackstation -c words.txt words-sha512.idx sha512
-      crackstation words.txt words-md5.idx md5 827ccb0eea8a706c4c34a16891f84e7b
+      crackstation words.txt words-md5.idx md5 827CCB0EEA8A706C4C34A16891F84E7B
 
 By default this program is very verbose displaying progressbars and similar
 whenever it makes sense. To disable this behavior for example to use it with
