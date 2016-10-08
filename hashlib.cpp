@@ -1,6 +1,6 @@
 #include "hashlib.h"
 
-std::vector<std::string> HashLib::hashes( { "MD4", "MD5", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "MySQL4.1+", "Whirlpool", "NTLM" } );
+std::vector<std::string> HashLib::hashes( { "MD4", "MD5", "SHA-1", "SHA-224", "SHA-256", "SHA-384", "SHA-512", "MySQL4.1+", "Whirlpool", "LM", "NTLM" } );
 
 HashLib * HashLib::getHasher( std::string hashName ) {
 	removeChars( hashName, "-+., " );
@@ -24,6 +24,8 @@ HashLib * HashLib::getHasher( std::string hashName ) {
 		return new HashMySQL41();
 	} else if ( hashName == "whirlpool" ) {
 		return new HashWhirlpool();
+	} else if ( hashName == "lm" ) {
+		return new HashLM();
 	} else if ( hashName == "ntlm" ) {
 		return new HashNTLM();
 	} else {
@@ -222,12 +224,45 @@ HashLib::size_type HashWhirlpool::getLength() {
 	return length;
 }
 
+// LM
+HashLib::Hash HashLM::hash( const byte * stringToHash, size_t strSize ) {
+	std::array<byte, 14> paddedString( { 0 } );
+
+	for ( size_t i = 0; i < std::min<size_t>( strSize, 14 ); i++ )
+		paddedString[i] = toupper( stringToHash[i] );
+
+	DESencrypt( paddedString.data(), hashStorage );
+	DESencrypt( paddedString.data() + 7, hashStorage + 8 );
+
+	return Hash( hashStorage, length );
+}
+
+HashLib::size_type HashLM::getLength() {
+	return length;
+}
+
+void HashLM::DESencrypt( const byte * data, byte * storage ) {
+	std::array<byte, 8> key( { 0 } );
+	DES_key_schedule keysched;
+
+	key[0] = (data[0] & 254);
+	key[1] = (data[0] << 7) | (data[1] >> 1);
+	key[2] = (data[1] << 6) | (data[2] >> 2);
+	key[3] = (data[2] << 5) | (data[3] >> 3);
+	key[4] = (data[3] << 4) | (data[4] >> 4);
+	key[5] = (data[4] << 3) | (data[5] >> 5);
+	key[6] = (data[5] << 2) | (data[6] >> 6);
+	key[7] = (data[6] << 1);
+
+	DES_set_key( reinterpret_cast<const_DES_cblock *>(key.data()), &keysched );
+
+	DES_ecb_encrypt( reinterpret_cast<const_DES_cblock *>(message), reinterpret_cast<const_DES_cblock *>(storage), &keysched, DES_ENCRYPT );
+}
+
 // NTLM
 HashLib::Hash HashNTLM::hash( const byte * stringToHash, size_t strSize ) {
 	// Using smart pointer to enable RAII
-	std::unique_ptr<byte[]> paddedString( new byte[strSize * 2] );
-
-	std::fill_n( paddedString.get(), strSize * 2, '\0' );
+	std::unique_ptr<byte[]> paddedString( new byte[strSize * 2]() );
 
 	for ( size_t i = 0; i < strSize; i++ )
 		paddedString[2 * i] = stringToHash[i];

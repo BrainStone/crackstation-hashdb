@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include <openssl/des.h>
 #include <openssl/md4.h>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
@@ -177,6 +178,23 @@ protected:
 
 private:
 	byte hashStorage[length];
+};
+
+class HashLM : public HashLib {
+public:
+	using HashLib::hash;
+	virtual Hash hash( const byte * stringToHash, size_t strSize );
+	virtual size_type getLength();
+
+protected:
+	static constexpr size_type length = 16;
+
+private:
+	static constexpr char* message = const_cast<char *>("\x4b\x47\x53\x21\x40\x23\x24\x25");
+
+	byte hashStorage[length];
+
+	void DESencrypt( const byte * data, byte * storage );
 };
 
 class HashNTLM : public HashMD4 {
