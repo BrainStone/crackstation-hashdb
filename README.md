@@ -99,6 +99,9 @@ If you need help with the parameters simply run `./crackstation -h`. This will
 generate a message explaining all parameters and flags similar to the following:
 
     Usage:
+      Display help:
+        crackstation -h
+    
       Create dictionary:
         crackstation -c [-v] [test]... [-r <Size>] [-q] <wordlist> <dictionary> <hashtype>
     

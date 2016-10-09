@@ -3,6 +3,8 @@
 const option::Descriptor usage[] =
 {
 	{ UNKNOWN    , 0, "" , ""      , option::Arg::None    , "Usage:\n"
+															"  Display help:\n"
+															"    crackstation -h\n\n"
 															"  Create dictionary:\n"
 															"    crackstation -c [-v] [test]... [-r <Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
 															"  Find hash in dictionary:\n"
@@ -10,8 +12,8 @@ const option::Descriptor usage[] =
 															"  Verify dictionary:\n"
 															"    crackstation -v [test]... [-q] [wordlist] <dictionary> [hashtype]\n\n"
 															"  List available hashes:\n"
-															"    crackstation -l\n\n\n"
-															"Modes:" },
+															"    crackstation -l" },
+	{ UNKNOWN    , 0, "" , ""      , option::Arg::None    , "\n\n\nModes:" },
 	{ HELP       , 0, "h", "help"  , option::Arg::None    , "  -h, --help,         \tPrint usage and exit." },
 	{ CREATE     , 0, "c", "create", option::Arg::None    , "  -c, --create        \tCreates the dictionary from the wordlist." },
 	{ VERIFY     , 0, "v", "verify", option::Arg::None    , "  -v, --verify        \tVerifies that the dictionary is sorted." },
@@ -74,7 +76,7 @@ int main( int argc, char* argv[] ) {
 		((mode == MODE_VERIFY) && ((nonOptions != 1) && (nonOptions != 3))) ||
 		 ((mode == MODE_LIST) && (nonOptions != 0)) ||
 		 ((mode == MODE_SEARCH) && (nonOptions <= 3)) ) {
-		mode = MODE_HELP;
+		mode = MODE_USAGE;
 	}
 
 	const bool quiet = options[QUIET];
@@ -85,6 +87,10 @@ int main( int argc, char* argv[] ) {
 			std::cout << "Unknown option: " << opt->name << "\n";
 
 	try {
+		if ( mode == MODE_USAGE ) {
+			std::cerr << usage[0].help << std::endl;
+		}
+
 		if ( mode == MODE_HELP ) {
 			option::printUsage( std::cerr, usage, ProgressBar::getConsoleWidth() );
 		}
