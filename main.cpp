@@ -1,32 +1,46 @@
 #include "main.h"
 
-enum  optionIndex {
-	UNKNOWN, HELP, CREATE, VERIFY, LIST, QUIET, RAM
-};
-enum  programMode {
-	MODE_HELP, MODE_CREATE, MODE_CREATE_VERIFY, MODE_VERIFY, MODE_LIST, MODE_SEARCH
-};
 const option::Descriptor usage[] =
 {
-	{ UNKNOWN, 0, "" , ""      , option::Arg::None, "Usage:\n"
-													"  Create dictionary:\n"
-													"    crackstation -c [-v] [-r <Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
-													"  Find hash in dictionary:\n"
-													"    crackstation [-q] <wordlist> <dictionary> <hashtype> <hashes>...\n\n"
-													"  Verify dictionary:\n"
-													"    crackstation -v [-q] [wordlist] <dictionary> [hashtype]\n\n"
-													"  List available hashes:\n"
-													"    crackstation -l\n\n\n"
-													"Options:" },
-	{ HELP   , 0, "h", "help"  , option::Arg::None, "  -h, --help,     \tPrint usage and exit." },
-	{ CREATE , 0, "c", "create", option::Arg::None, "  -c, --create    \tCreates the dictionary from the wordlist." },
-	{ VERIFY , 0, "v", "verify", option::Arg::None, "  -v, --verify    \tVerifies that the dictionary is sorted." },
-	{ LIST   , 0, "l", "list"  , option::Arg::None, "  -l, --list      \tLists all available hashes separted by a space character." },
-	{ QUIET  , 0, "q", "quiet" , option::Arg::None, "  -q, --quiet     \tDisables most output. Usefull for automated scripts." },
-	{ RAM    , 0, "r", "ram"   , Arg::ULong       , "  -r, --ram=SIZE  \tHow much RAM (SIZE MiB) to use for the cache when sorting the index file. (Only used when -c is set)." },
-	{ UNKNOWN, 0, "" ,  ""     , option::Arg::None, "\nExamples:\n"
-													"  crackstation -c words.txt words-sha512.idx sha512\n"
-													"  crackstation words.txt words-md5.idx md5 827CCB0EEA8A706C4C34A16891F84E7B\n" },
+	{ UNKNOWN    , 0, "" , ""      , option::Arg::None    , "Usage:\n"
+															"  Create dictionary:\n"
+															"    crackstation -c [-v] [test]... [-r <Size>] [-q] <wordlist> <dictionary> <hashtype>\n\n"
+															"  Find hash in dictionary:\n"
+															"    crackstation [-q] <wordlist> <dictionary> <hashtype> <hashes>...\n\n"
+															"  Verify dictionary:\n"
+															"    crackstation -v [test]... [-q] [wordlist] <dictionary> [hashtype]\n\n"
+															"  List available hashes:\n"
+															"    crackstation -l\n\n\n"
+															"Modes:" },
+	{ HELP       , 0, "h", "help"  , option::Arg::None    , "  -h, --help,         \tPrint usage and exit." },
+	{ CREATE     , 0, "c", "create", option::Arg::None    , "  -c, --create        \tCreates the dictionary from the wordlist." },
+	{ VERIFY     , 0, "v", "verify", option::Arg::None    , "  -v, --verify        \tVerifies that the dictionary is sorted." },
+	{ LIST       , 0, "l", "list"  , option::Arg::None    , "  -l, --list          \tLists all available hashes separted by a space character.\n" },
+
+	{ UNKNOWN    , 0, "" , ""      , option::Arg::None    , "General options:" },
+	{ QUIET      , 0, "q", "quiet" , option::Arg::None    , "  -q, --quiet         \tDisables most output. Usefull for automated scripts.\n" },
+
+	{ UNKNOWN    , 0, "" , ""      , option::Arg::None    , "Create options:" },
+	{ RAM        , 0, "r", "ram"   , Arg::ULong           , "  -r, --ram=SIZE      \tHow much RAM (SIZE MiB) to use for the cache when sorting the index file. (Only used when -c is set).\n" },
+
+	{ UNKNOWN    , 0, "" , ""      , option::Arg::None    , "Verify options:" },
+	{ TESTS_ALL  , 0, "a", "all"   , option::Arg::None    , "  -a, --all           \tEnables all tests. If \"wordlist\" and \"hashtype\" are not specified all tests requiring them will be silently skipped!\n"
+															"\tEquivalent to: -s -m" },
+	{ TESTS_FAST , 0, "f", "fast"  , option::Arg::None    , "  -f, --fast          \tEnables all fast tests. If no tests are specified these tests will be run. If \"wordlist\" and \"hashtype\" are not specified all tests requiring them will be silently skipped!\n"
+															"\tEquivalent to: -s -m RANDOM_FULL\n" },
+	{ TEST_SORTED, 0, "s", "sorted", option::Arg::None    , "  -s, --sorted        \tChecks whether the index file is sorted." },
+	{ TEST_MATCH , 0, "m", "match" , isMatchMode          , "  -m, --match[=MODE]  \tTries to hash and then find all or some entries from the wordlist (depending on the mode). See below for match modes. Requires \"wordlist\" and \"hashtype\" to be specified!" },
+
+	{ UNKNOWN    , 0, "" ,  ""     , option::Arg::None    , "\nMatch Modes:\n"
+															"  ALL:            \tGo through the entire word list and do full and partial matching. (Default)\n"
+															"  ALL_FULL:       \tGo through the entire word list and only do full matching.\n"
+															"  ALL_PARTIAL:    \tGo through the entire word list and only do partial matching.\n"
+															"  RANDOM:         \tPick random elements from the word list and do full and partial matching.\n"
+															"  RANDOM_FULL:    \tPick random elements from the word list and only do full matching.\n"
+															"  RANDOM_PARTIAL: \tPick random elements from the word list and only do partial matching.\n\n"
+															"Examples:\n"
+															"  crackstation -c words.txt words-sha512.idx sha512\n"
+															"  crackstation words.txt words-md5.idx md5 827CCB0EEA8A706C4C34A16891F84E7B" },
 	{ 0,0,0,0,0,0 }
 };
 
@@ -81,14 +95,31 @@ int main( int argc, char* argv[] ) {
 			const std::string hashName( parse.nonOption( 2 ) );
 
 			createIDX( wordlist, idxFile, hashName, quiet );
-			//sortIDX(idxFile, ram, quiet );
+			sortIDX( idxFile, ram, quiet );
 		}
 
 		if ( (mode == MODE_VERIFY) || (mode == MODE_CREATE_VERIFY) ) {
-			const std::string idxFile( parse.nonOption( (nonOptions == 1) ? 0 : 1 ) );
+			const bool onlyIdxFile( nonOptions == 1 );
+			const std::string wordlist( onlyIdxFile ? "" : parse.nonOption( 0 ) );
+			const std::string idxFile( parse.nonOption( onlyIdxFile ? 0 : 1 ) );
+			const std::string hashName( onlyIdxFile ? "" : parse.nonOption( 2 ) );
 
-			// Just for testing....
-			sortIDX( idxFile, ram, quiet );
+			const bool testsAll( options[TESTS_ALL] );
+			const bool testsFast( options[TESTS_FAST] || (!testsAll && !options[TEST_SORTED] && !options[TEST_MATCH]) );
+
+			const bool testSorted( options[TEST_SORTED] || testsAll || testsFast );
+			const bool testMatch( (options[TEST_MATCH] || testsAll || testsFast) && !onlyIdxFile );
+
+			const matchMode mMode( getMatchMode( (options[TEST_MATCH].arg == NULL) ? (testsFast ? "RANDOM_FULL" : "ALL") : options[TEST_MATCH].arg ) );
+
+			// Run tests here!
+			if ( testSorted ) {
+				// Test if file is sorted
+			}
+
+			if ( testMatch ) {
+				// Test if the wordlist matches the 
+			}
 		}
 
 		if ( mode == MODE_LIST ) {
@@ -124,4 +155,35 @@ int main( int argc, char* argv[] ) {
 	}
 
 	return 0;
+}
+
+matchMode getMatchMode( std::string str ) {
+	static const std::map<std::string, matchMode> strToMatchMode {
+		{ "ALL", MATCH_ALL }, { "ALL_FULL", MATCH_ALL_FULL }, { "ALL_PARTIAL", MATCH_ALL_PARTIAL },
+		{ "RANDOM", MATCH_RANDOM }, { "RANDOM_FULL", MATCH_RANDOM_FULL }, { "RANDOM_PARTIAL", MATCH_RANDOM_PARTIAL }
+	};
+
+	strToUpper( str );
+
+	try {
+		return strToMatchMode.at( str );
+	} catch ( const std::out_of_range & e ) {
+		throw std::invalid_argument( "Unknown Match Mode \"" + str + "\"!" );
+	}
+}
+
+option::ArgStatus isMatchMode( const option::Option & option, bool msg ) {
+	if ( (option.arg == NULL) || (option.name[option.namelen] != '\0') || (option.arg[0] == '-') )
+		return option::ARG_IGNORE;
+
+	try {
+		getMatchMode( option.arg );
+
+		return option::ARG_OK;
+	} catch ( const std::invalid_argument & e ) {
+		if ( msg )
+			std::cerr << e.what() << std::endl;
+
+		return option::ARG_ILLEGAL;
+	}
 }

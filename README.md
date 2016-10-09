@@ -100,26 +100,60 @@ generate a message explaining all parameters and flags similar to the following:
 
     Usage:
       Create dictionary:
-        crackstation -c [-v] [-r <Size>] [-q] <wordlist> <dictionary> <hashtype>
+        crackstation -c [-v] [test]... [-r <Size>] [-q] <wordlist> <dictionary>
+    <hashtype>
     
       Find hash in dictionary:
         crackstation [-q] <wordlist> <dictionary> <hashtype> <hashes>...
     
       Verify dictionary:
-        crackstation -v [-q] [wordlist] <dictionary> [hashtype]
+        crackstation -v [test]... [-q] [wordlist] <dictionary> [hashtype]
     
       List available hashes:
         crackstation -l
     
     
-    Options:
-      -h, --help,     Print usage and exit.
-      -c, --create    Creates the dictionary from the wordlist.
-      -v, --verify    Verifies that the dictionary is sorted.
-      -l, --list      Lists all available hashes separted by a space character.
-      -q, --quiet     Disables most output. Usefull for automated scripts.
-      -r, --ram=SIZE  How much RAM (SIZE MiB) to use for the cache when sorting
-                      the index file. (Only used when -c is set).
+    Modes:
+      -h, --help,         Print usage and exit.
+      -c, --create        Creates the dictionary from the wordlist.
+      -v, --verify        Verifies that the dictionary is sorted.
+      -l, --list          Lists all available hashes separted by a space character.
+    
+    General options:
+      -q, --quiet         Disables most output. Usefull for automated scripts.
+    
+    Create options:
+      -r, --ram=SIZE      How much RAM (SIZE MiB) to use for the cache when sorting
+                          the index file. (Only used when -c is set).
+    
+    Verify options:
+      -a, --all           Enables all tests. If "wordlist" and "hashtype" are not
+                          specified all tests requiring them will be silently
+                          skipped!
+                          Equivalent to: -s -m
+      -f, --fast          Enables all fast tests. If no tests are specified these
+                          tests will be run. If "wordlist" and "hashtype" are not
+                          specified all tests requiring them will be silently
+                          skipped!
+                          Equivalent to: -s -m RANDOM_FULL
+    
+      -s, --sorted        Checks whether the index file is sorted.
+      -m, --match[=MODE]  Tries to hash and then find all or some entries from the
+                          wordlist (depending on the mode). See below for match
+                          modes. Requires "wordlist" and "hashtype" to be specified!
+    
+    Match Modes:
+      ALL:                Go through the entire word list and do full and partial
+                          matching. (Default)
+      ALL_FULL:           Go through the entire word list and only do full matching.
+      ALL_PARTIAL:        Go through the entire word list and only do partial
+                          matching.
+      RANDOM:             Pick random elements from the word list and do full and
+                          partial matching.
+      RANDOM_FULL:        Pick random elements from the word list and only do full
+                          matching.
+      RANDOM_PARTIAL:     Pick random elements from the word list and only do
+                          partial matching.
     
     Examples:
       crackstation -c words.txt words-sha512.idx sha512

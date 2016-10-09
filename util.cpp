@@ -43,7 +43,7 @@ option::ArgStatus Arg::Long( const option::Option& option, bool msg ) {
 		return option::ARG_OK;
 	} catch ( const std::exception & ) {
 		if ( msg )
-			std::cerr << "Option '" << option.name << "' requires a numeric argument\n" << std::endl;
+			std::cerr << "Option '" << std::string( option.name, option.namelen ) << "' requires a numeric argument\n" << std::endl;
 
 		return option::ARG_ILLEGAL;
 	}
@@ -56,7 +56,7 @@ option::ArgStatus Arg::ULong( const option::Option& option, bool msg ) {
 		return option::ARG_OK;
 	} catch ( const std::exception & ) {
 		if ( msg )
-			std::cerr << "Option '" << option.name << "' requires a non-negative numeric argument\n" << std::endl;
+			std::cerr << "Option '" << std::string( option.name, option.namelen ) << "' requires a non-negative numeric argument\n" << std::endl;
 
 		return option::ARG_ILLEGAL;
 	}
@@ -64,6 +64,12 @@ option::ArgStatus Arg::ULong( const option::Option& option, bool msg ) {
 
 std::string & strToLower( std::string & s ) {
 	std::transform( s.begin(), s.end(), s.begin(), ::tolower );
+
+	return s;
+}
+
+std::string & strToUpper( std::string & s ) {
+	std::transform( s.begin(), s.end(), s.begin(), ::toupper );
 
 	return s;
 }

@@ -42,6 +42,7 @@ struct Arg : public option::Arg {
 };
 
 std::string & strToLower( std::string & s );
+std::string & strToUpper( std::string & s );
 std::string & removeChars( std::string & s, const std::string& chars );
 std::string & keepChars( std::string & s, const std::string& chars );
 std::string centerString( size_t width, const std::string& str );
