@@ -4,32 +4,40 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <iomanip>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <thread>
+#include <tuple>
 #include <vector>
 #include <unistd.h>
 
 #include <sys/ioctl.h>
 
-#include "util.h"
-
 class ProgressBar {
 public:
+	typedef std::lock_guard<std::mutex> scoped_lock;
 	typedef std::chrono::high_resolution_clock HRC;
 	typedef std::chrono::duration<double> duration;
+	typedef std::tuple<std::string, size_t, std::function<std::string( double )>> SegmentBase;
+	typedef std::function<std::string( double )> extraDataFunc;
+
+	class Segment;
 
 	ProgressBar();
-	ProgressBar( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator = std::function<std::string( double )>() );
+	ProgressBar( const std::vector<Segment> & segments, bool displaySubProgress );
+	ProgressBar( const std::vector<Segment> & segments, extraDataFunc extraDataGenerator = extraDataFunc(), bool displaySubProgress = false );
 	~ProgressBar();
 
 	static winsize getConsoleSize();
 	static unsigned short getConsoleHeight();
 	static unsigned short getConsoleWidth();
 
-	void init( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator = std::function<std::string( double )>() );
+	void init( const std::vector<Segment> & segments, bool displaySubProgress );
+	void init( const std::vector<Segment> & segments, extraDataFunc extraDataGenerator = extraDataFunc(), bool displaySubProgress = false );
 	void start();
 	void finish( bool blocking = false );
 
@@ -44,6 +52,7 @@ private:
 	template<typename T>
 	static double div( const T& lhs, const T& rhs );
 	static std::string getPercentString( double progress, size_t width );
+	static std::string centerString( size_t width, const std::string& str );
 
 	bool initialized;
 	std::atomic<bool> isRunning;
@@ -51,18 +60,31 @@ private:
 	HRC::time_point startTime;
 	std::unique_ptr<std::thread> thread;
 	std::atomic<size_t> activeSegment;
-	std::vector<std::string> segmentNames;
-	std::vector<size_t> segmentWeights;
+	std::vector<Segment> segments;
 	std::vector<double> segmentProgresses;
+	std::vector<HRC::time_point> segmentStartTimes;
 	std::mutex segmentsMutex;
-	std::function<std::string( double )> extraDataGenerator;
+	extraDataFunc extraDataGenerator;
+	bool displaySubProgress;
 
 	void renderThread();
 	void renderBar( double progress );
 	double getTotalProgress();
-	const std::string & getActiveSegment();
+	const Segment & getActiveSegment();
 };
 
 std::ostream & operator<<( std::ostream & os, ProgressBar::duration dSeconds );
+
+class ProgressBar::Segment : public ProgressBar::SegmentBase {
+public:
+	Segment() = default;
+	Segment( std::string title, size_t weight, extraDataFunc extraDataGenerator = extraDataFunc() );
+
+	const std::string & getTitle() const;
+	const size_t & getWeight() const;
+	const extraDataFunc & getExtraDataGenerator() const;
+
+	bool hasExtraDataGenerator() const;
+};
 
 #endif

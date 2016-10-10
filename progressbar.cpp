@@ -6,12 +6,17 @@ ProgressBar::ProgressBar() :
 	totalWeight( 0 ),
 	thread( nullptr ),
 	activeSegment( 0 ),
-	segmentNames( 0 ),
-	segmentWeights( 0 ),
-	segmentProgresses( 0 ) {}
+	segments( 0 ),
+	segmentProgresses( 0 ),
+	segmentStartTimes( 0 ),
+	displaySubProgress( false ) {}
 
-ProgressBar::ProgressBar( const std::vector<std::pair<std::string, size_t>>& segments, std::function<std::string( double )> extraDataGenerator ) : ProgressBar() {
-	init( segments, extraDataGenerator );
+ProgressBar::ProgressBar( const std::vector<Segment>& segments, bool displaySubProgress ) : ProgressBar() {
+	init( segments, displaySubProgress );
+}
+
+ProgressBar::ProgressBar( const std::vector<Segment>& segments, extraDataFunc extraDataGenerator, bool displaySubProgress ) : ProgressBar() {
+	init( segments, extraDataGenerator, displaySubProgress );
 }
 
 ProgressBar::~ProgressBar() {
@@ -33,31 +38,36 @@ unsigned short ProgressBar::getConsoleWidth() {
 	return getConsoleSize().ws_col;
 }
 
-void ProgressBar::init( const std::vector<std::pair<std::string, size_t>> & segments, std::function<std::string( double )> extraDataGenerator ) {
+void ProgressBar::init( const std::vector<Segment> & segments, bool displaySubProgress ) {
+	init( segments, extraDataFunc(), displaySubProgress );
+}
+
+void ProgressBar::init( const std::vector<Segment> & segments, extraDataFunc extraDataGenerator, bool displaySubProgress ) {
 	if ( initialized )
 		// Should I throw an exception?
 		return;
 
-	segmentNames.reserve( segments.size() );
-	segmentWeights.reserve( segments.size() );
+	this->segments.reserve( segments.size() );
 	segmentProgresses.resize( segments.size(), 0.0 );
+	segmentStartTimes.reserve( segments.size() );
 
-	for ( const std::pair<std::string, size_t> & segment : segments ) {
-		segmentNames.push_back( segment.first );
-		segmentWeights.push_back( segment.second );
+	for ( const Segment & segment : segments ) {
+		this->segments.push_back( segment );
 
-		totalWeight += segment.second;
+		totalWeight += segment.getWeight();
 	}
 
 	this->extraDataGenerator = extraDataGenerator;
+	this->displaySubProgress = displaySubProgress;
 
 	initialized = true;
 }
 
 void ProgressBar::start() {
-	std::cout << "\n\n\33[s\33[?25l";
+	std::cout << "\33[?25l";
 
 	startTime = HRC::now();
+	segmentStartTimes[0] = HRC::now();
 	isRunning = true;
 	thread = std::unique_ptr<std::thread>( new std::thread( &ProgressBar::renderThread, this ) );
 
@@ -77,14 +87,17 @@ void ProgressBar::finish( bool blocking ) {
 	// Make sure the bar is filled
 	renderBar( 1.0 );
 
-	std::cout << "\33[?25h\n" << std::flush;
+	std::cout << "\33[?25h\n\n\n" << (displaySubProgress ? "\n\n\n" : "") << std::flush;
 }
 
 void ProgressBar::updateProgress( size_t numSegment, double progress ) {
 	if ( !initialized )
 		return;
 
-	activeSegment = numSegment;
+	if ( activeSegment != numSegment ) {
+		activeSegment = numSegment;
+		segmentStartTimes[activeSegment] = HRC::now();
+	}
 
 	scoped_lock lock( segmentsMutex );
 
@@ -114,6 +127,20 @@ std::string ProgressBar::getPercentString( double progress, size_t width ) {
 	return centerString( width, sstr.str() );
 }
 
+std::string ProgressBar::centerString( size_t width, const std::string& str ) {
+	size_t len = str.length();
+
+	if ( width < len ) {
+		return str;
+	}
+
+	int diff = width - len;
+	int pad1 = diff / 2;
+	int pad2 = diff - pad1;
+
+	return std::string( pad1, ' ' ) + str + std::string( pad2, ' ' );
+}
+
 void ProgressBar::renderThread() {
 	double progress;
 
@@ -130,20 +157,36 @@ void ProgressBar::renderThread() {
 }
 
 void ProgressBar::renderBar( double progress ) {
-	duration timeElapsed = std::chrono::duration_cast<duration>(HRC::now() - startTime);
-	duration timeRemaining = (1.0 / progress - 1.0) * timeElapsed;
+	const duration timeElapsed = std::chrono::duration_cast<duration>(HRC::now() - startTime);
+	const duration timeRemaining = (1.0 / progress - 1.0) * timeElapsed;
 	const size_t barWidth = getConsoleWidth();
 	const size_t splitPos = barWidth * progress;
 	const std::string percentString = getPercentString( progress, barWidth );
 
-	std::cout << "\33[u\33[2A\33[K" << centerString( barWidth, "===== " + getActiveSegment() + " =====" ) << '\n';
+	std::cout << "\33[s\33[K" << centerString( barWidth, "===== " + (displaySubProgress ? "Total" : getActiveSegment().getTitle()) + " =====" ) << '\n';
 	std::cout << "\33[K\33[7m" << percentString.substr( 0, splitPos ) << "\33[0m" << percentString.substr( splitPos ) << '\n';
-	std::cout << "\33[s\33[KTime elapsed: " << timeElapsed << "\tTime remaining: " << timeRemaining;
+	std::cout << "\33[KTime elapsed: " << timeElapsed << "\tTime remaining: " << timeRemaining;
 
 	if ( extraDataGenerator )
 		std::cout << "\t" << extraDataGenerator( progress );
 
-	std::cout.flush();
+	if ( displaySubProgress ) {
+		const Segment & segment = getActiveSegment();
+		const double segmentProgress = segmentProgresses[activeSegment];
+		const duration segmentTimeElapsed = std::chrono::duration_cast<duration>(HRC::now() - segmentStartTimes[activeSegment]);
+		const duration segmentTimeRemaining = (1.0 / segmentProgress - 1.0) * timeElapsed;
+		const size_t segmentSplitPos = barWidth * segmentProgress;
+		const std::string segmentPercentString = getPercentString( segmentProgress, barWidth );
+
+		std::cout << "\n\33[K" << centerString( barWidth, "===== " + segment.getTitle() + " =====" ) << '\n';
+		std::cout << "\33[K\33[7m" << segmentPercentString.substr( 0, segmentSplitPos ) << "\33[0m" << segmentPercentString.substr( segmentSplitPos ) << '\n';
+		std::cout << "\33[KTime elapsed: " << segmentTimeElapsed << "\tTime remaining: " << segmentTimeRemaining;
+
+		if ( segment.hasExtraDataGenerator() )
+			std::cout << "\t" << segment.getExtraDataGenerator()(progress);
+	}
+
+	std::cout << "\33[u" << std::flush;
 }
 
 double ProgressBar::getTotalProgress() {
@@ -151,16 +194,16 @@ double ProgressBar::getTotalProgress() {
 	scoped_lock lock( segmentsMutex );
 
 	for ( size_t i = 0; i < segmentProgresses.size(); i++ ) {
-		progress += div( segmentWeights[i], totalWeight ) * segmentProgresses[i];
+		progress += div( segments[i].getWeight(), totalWeight ) * segmentProgresses[i];
 	}
 
 	return progress;
 }
 
-const std::string & ProgressBar::getActiveSegment() {
+const ProgressBar::Segment & ProgressBar::getActiveSegment() {
 	scoped_lock lock( segmentsMutex );
 
-	return segmentNames[activeSegment];
+	return segments[activeSegment];
 }
 
 std::ostream & operator<<( std::ostream & os, ProgressBar::duration dSeconds ) {
@@ -186,4 +229,23 @@ std::ostream & operator<<( std::ostream & os, ProgressBar::duration dSeconds ) {
 		<< std::fixed << std::setw( 4 ) << std::setfill( '0' ) << std::setprecision( 1 ) << dSeconds.count();
 
 	return os;
+}
+
+ProgressBar::Segment::Segment( std::string title, size_t weight, std::function<std::string( double )> extraDataGenerator ) :
+	ProgressBar::SegmentBase( title, weight, extraDataGenerator ) {}
+
+const std::string & ProgressBar::Segment::getTitle() const {
+	return std::get<0>( *this );
+}
+
+const size_t & ProgressBar::Segment::getWeight() const {
+	return std::get<1>( *this );
+}
+
+const ProgressBar::extraDataFunc & ProgressBar::Segment::getExtraDataGenerator() const {
+	return std::get<2>( *this );
+}
+
+bool ProgressBar::Segment::hasExtraDataGenerator() const {
+	return (bool)getExtraDataGenerator();
 }

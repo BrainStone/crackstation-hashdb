@@ -16,7 +16,6 @@
 constexpr size_t MB = 1024 * 1024;
 
 // Typedefs & Structs
-typedef std::lock_guard<std::mutex> scoped_lock;
 typedef unsigned char byte;
 
 // Functions
@@ -45,7 +44,6 @@ std::string & strToLower( std::string & s );
 std::string & strToUpper( std::string & s );
 std::string & removeChars( std::string & s, const std::string& chars );
 std::string & keepChars( std::string & s, const std::string& chars );
-std::string centerString( size_t width, const std::string& str );
 byte hexCharToByte( char c );
 
 template <typename T>

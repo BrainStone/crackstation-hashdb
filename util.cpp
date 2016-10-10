@@ -90,20 +90,6 @@ std::string& keepChars( std::string& s, const std::string& chars ) {
 	return s;
 }
 
-std::string centerString( size_t width, const std::string& str ) {
-	size_t len = str.length();
-
-	if ( width < len ) {
-		return str;
-	}
-
-	int diff = width - len;
-	int pad1 = diff / 2;
-	int pad2 = diff - pad1;
-
-	return std::string( pad1, ' ' ) + str + std::string( pad2, ' ' );
-}
-
 byte hexCharToByte( char c ) {
 	switch ( c ) {
 	case '0': return 0x0;
