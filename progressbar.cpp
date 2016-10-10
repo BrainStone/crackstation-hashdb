@@ -231,9 +231,6 @@ std::ostream & operator<<( std::ostream & os, ProgressBar::duration dSeconds ) {
 	return os;
 }
 
-ProgressBar::Segment::Segment( std::string title, size_t weight, std::function<std::string( double )> extraDataGenerator ) :
-	ProgressBar::SegmentBase( title, weight, extraDataGenerator ) {}
-
 const std::string & ProgressBar::Segment::getTitle() const {
 	return std::get<0>( *this );
 }
@@ -249,3 +246,6 @@ const ProgressBar::extraDataFunc & ProgressBar::Segment::getExtraDataGenerator()
 bool ProgressBar::Segment::hasExtraDataGenerator() const {
 	return (bool)getExtraDataGenerator();
 }
+
+ProgressBar::Segment::Segment( std::string title, size_t weight, extraDataFunc extraDataGenerator ) :
+	ProgressBar::SegmentBase( title, weight, extraDataGenerator ) {}
