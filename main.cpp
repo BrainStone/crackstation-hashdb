@@ -53,7 +53,7 @@ int main( int argc, char* argv[] ) {
 	option::Parser parse( usage, argc, argv, options, buffer );
 
 	if ( parse.error() )
-		return 2;
+		return exitParseFailure;
 
 	programMode mode;
 	const size_t nonOptions = parse.nonOptionsCount();
@@ -118,22 +118,26 @@ int main( int argc, char* argv[] ) {
 
 			const matchMode mMode( getMatchMode( (options[TEST_MATCH].arg == NULL) ? (testsFast ? "RANDOM_FULL" : "ALL") : options[TEST_MATCH].arg ) );
 
-			FileArray fileArray( idxFile );
-			const size_t indexElements = fileArray.getSize();
-			ProgressBar progressBar( {
-				{"Test: Sorted", testSorted ? indexElements : 0},
-				{"Test: Match", testMatch ? (((mMode & modeAll) ? indexElements : (size_t)sqrt( indexElements )) * (((mMode & modeFull) + (mMode & modePartial)) * 2)) : 0}
-			}, true );
+			const size_t indexElements = FileArray::getSize( idxFile );
+			ProgressBar progressBar;
 			std::unordered_map<std::string, bool> testResults;
 			std::vector<std::string> insertionOrder;
 			bool result;
+			bool finalResult = true;
 
-			std::cout << "\nRunning Tests:" << std::endl;
-			progressBar.start();
+			if ( !quiet ) {
+				std::cout << "\nRunning Tests:" << std::endl;
+
+				progressBar.init( {
+					{ "Test: Sorted", testSorted ? indexElements : 0 },
+					{ "Test: Match", testMatch ? (((mMode & modeAll) ? indexElements : (size_t)sqrt( indexElements )) * (((mMode & modeFull) + (mMode & modePartial)) * 2)) : 0 }
+				}, true );
+				progressBar.start();
+			}
 
 			// Run tests here!
 			if ( testSorted ) {
-				testResults.insert( std::make_pair( "Sorted", runTestSorted( fileArray, progressBar ) ) );
+				testResults.insert( std::make_pair( "Sorted", runTestSorted( idxFile, progressBar, quiet ) ) );
 				insertionOrder.push_back( "Sorted" );
 			}
 
@@ -141,18 +145,30 @@ int main( int argc, char* argv[] ) {
 				// Test if the wordlist matches the 
 			}
 
-			progressBar.finish(true);
+			if ( !quiet ) {
+				progressBar.finish( true );
 
-			// Display results
-			std::cout << "\nTest Results:\n======================================" << std::endl;
+				// Display results
+				std::cout << "\nTest Results:\n=========================================" << std::endl;
+			}
 
 			for ( std::string test : insertionOrder ) {
 				result = testResults[test];
-				test += ':';
-				test.resize( 20, ' ' );
+				finalResult = finalResult && result;
 
-				std::cout << "\tTest: " << test << (result ? "\33[32mOK" : "\33[1;31mFailed!") << "\33[0m" << std::endl;
+				if ( quiet ) {
+					if ( !result )
+						std::cout << "Test: " << test << ": Failed!" << std::endl;
+				} else {
+					test += ':';
+					test.resize( 20, ' ' );
+
+					std::cout << "\tTest: " << test << (result ? "\33[32mOK" : "\33[1;31mFailed!") << "\33[0m" << std::endl;
+				}
 			}
+
+			if ( !finalResult )
+				return exitTestFailure;
 		}
 
 		if ( mode == MODE_LIST ) {
@@ -184,10 +200,10 @@ int main( int argc, char* argv[] ) {
 	} catch ( const std::invalid_argument & e ) {
 		std::cerr << e.what() << std::endl;
 
-		return 1;
+		return exitGenericFailure;
 	}
 
-	return 0;
+	return exitSucess;
 }
 
 matchMode getMatchMode( std::string str ) {

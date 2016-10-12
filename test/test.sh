@@ -14,8 +14,7 @@ mkdir -p test-index-files
 
 for hash in "${hashTypes[@]}"; do
     echo "TESTING [$hash]..."
-    ./crackstation -c -v "test/words.txt" "test-index-files/test-words-$hash.idx" "$hash"
-    php test/test.php "$hash"
+    ./crackstation -cva "test/words.txt" "test-index-files/test-words-$hash.idx" "$hash"
 done
 
 echo ""

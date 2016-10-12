@@ -44,7 +44,6 @@ void ProgressBar::init( const std::vector<Segment> & segments, bool displaySubPr
 
 void ProgressBar::init( const std::vector<Segment> & segments, extraDataFunc extraDataGenerator, bool displaySubProgress ) {
 	if ( initialized )
-		// Should I throw an exception?
 		return;
 
 	this->segments.reserve( segments.size() );
@@ -116,7 +115,7 @@ int ProgressBar::getNumSegments() {
 
 template<typename T>
 inline double ProgressBar::div( const T & lhs, const T & rhs ) {
-	return static_cast<double>(lhs) / static_cast<double>(rhs);
+	return ((double)lhs) / ((double)rhs);
 }
 
 std::string ProgressBar::getPercentString( double progress, size_t width ) {

@@ -1,5 +1,13 @@
 #include "filearray.h"
 
+FileArray::posType FileArray::getFileSize( const std::string & fileName ) {
+	return std::ifstream( fileName, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate ).tellg();
+}
+
+FileArray::posType FileArray::getSize( const std::string & fileName ) {
+	return getFileSize( fileName ) / FileArray::IndexEntry::indexSize;
+}
+
 FileArray::FileArray( const std::string & fileName, bool autoLoad ) :
 	FileArray( fileName, 0, NULL, autoLoad ) {}
 
@@ -51,7 +59,7 @@ void FileArray::readEntry( IndexEntry & entry, FileArray::posType index ) {
 		entry = cache[index];
 	} else if ( index < size ) {
 		file.seekg( FileArray::IndexEntry::indexSize * index );
-		file.read( reinterpret_cast<char*>(&entry), FileArray::IndexEntry::indexSize );
+		file >> entry;
 	}
 }
 
@@ -60,7 +68,7 @@ void FileArray::writeEntry( const IndexEntry & entry, FileArray::posType index )
 		cache[index] = entry;
 	} else if ( index < size ) {
 		file.seekp( FileArray::IndexEntry::indexSize * index );
-		file.write( reinterpret_cast<const char*>(&entry), FileArray::IndexEntry::indexSize );
+		file << entry;
 	}
 }
 
@@ -70,7 +78,7 @@ void FileArray::loadCacheFromFile() {
 	file.seekg( 0 );
 
 	for ( IndexEntry & entry : cache ) {
-		file.read( reinterpret_cast<char*>(&entry), FileArray::IndexEntry::indexSize );
+		file >> entry;
 
 		if ( progressBar != NULL )
 			progressBar->updateProgress( 0, ++i, cacheSize );
@@ -84,7 +92,7 @@ void FileArray::writeCacheToFile() {
 	file.seekp( 0 );
 
 	for ( const IndexEntry & entry : cache ) {
-		file.write( reinterpret_cast<const char*>(&entry), FileArray::IndexEntry::indexSize );
+		file << entry;
 
 		if ( progressBar != NULL )
 			progressBar->updateProgress( lastSegment, ++i, cacheSize );
@@ -159,4 +167,16 @@ bool FileArray::IndexEntry::operator<=( const FileArray::IndexEntry & lhs ) cons
 
 bool FileArray::IndexEntry::operator>=( const FileArray::IndexEntry & lhs ) const {
 	return lhs <= *this;
+}
+
+std::ostream & operator<<( std::ostream & rhs, const FileArray::IndexEntry & lhs ) {
+	rhs.write( reinterpret_cast<const char*>(&lhs), FileArray::IndexEntry::indexSize );
+
+	return rhs;
+}
+
+std::istream & operator >> ( std::istream & rhs, FileArray::IndexEntry & lhs ) {
+	rhs.read( reinterpret_cast<char*>(&lhs), FileArray::IndexEntry::indexSize );
+
+	return rhs;
 }

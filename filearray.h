@@ -17,6 +17,9 @@ public:
 
 	struct IndexEntry;
 
+	static posType getFileSize( const std::string & fileName );
+	static posType getSize( const std::string & fileName );
+
 	FileArray( const std::string &fileName, bool autoLoad = true );
 	FileArray( const std::string &fileName, posType cacheSize, bool autoLoad = true );
 	FileArray( const std::string &fileName, ProgressBar* progressBar, bool autoLoad = true );
@@ -67,6 +70,9 @@ struct FileArray::IndexEntry {
 	bool operator> ( const IndexEntry &lhs ) const;
 	bool operator<=( const IndexEntry &lhs ) const;
 	bool operator>=( const IndexEntry &lhs ) const;
+
+	friend std::ostream & operator<<( std::ostream & rhs, const IndexEntry & lhs );
+	friend std::istream & operator >> ( std::istream & rhs, IndexEntry & lhs );
 } __attribute__( (__packed__) );
 
 #endif

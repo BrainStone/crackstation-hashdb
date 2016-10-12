@@ -21,6 +21,11 @@ constexpr int modeAll = 0b100;
 constexpr int modeFull = 0b010;
 constexpr int modePartial = 0b001;
 
+constexpr int exitSucess = EXIT_SUCCESS;
+constexpr int exitGenericFailure = EXIT_FAILURE;
+constexpr int exitTestFailure = exitGenericFailure + 1;
+constexpr int exitParseFailure = exitTestFailure + 1;
+
 // Enums
 enum optionIndex {
 	UNKNOWN, HELP, CREATE, VERIFY, LIST, QUIET, RAM, TESTS_ALL, TESTS_FAST, TEST_SORTED, TEST_MATCH

@@ -1,19 +1,21 @@
 #include "createidx.h"
 #include "checkidx.h"
 
-bool runTestSorted( FileArray & fileArray, ProgressBar & progressBar ) {
-	const size_t elements = fileArray.getSize();
+bool runTestSorted( const std::string & idxFile, ProgressBar & progressBar, bool quiet ) {
+	std::ifstream fileIn( idxFile, std::ios::in | std::ios::out | std::ios::binary | std::ios::ate );
+	const size_t elements = fileIn.tellg() / FileArray::IndexEntry::indexSize;
 	bool testPassed = true;
 
 	std::unique_ptr<FileArray::IndexEntry> first( new FileArray::IndexEntry() );
 	std::unique_ptr<FileArray::IndexEntry> last( new FileArray::IndexEntry() );
 
-	fileArray.readEntry( *first, 0 );
+	fileIn >> *first;
 
 	for ( size_t i = 0; i < elements; i++ ) {
-		progressBar.updateProgress( 0, i, elements );
+		if ( !quiet )
+			progressBar.updateProgress( 0, i, elements );
 
-		fileArray.readEntry( *last, 0 );
+		fileIn >> *last;
 
 		if ( *last < *first ) {
 			testPassed = false;
@@ -24,7 +26,8 @@ bool runTestSorted( FileArray & fileArray, ProgressBar & progressBar ) {
 		std::swap( first, last );
 	}
 
-	progressBar.updateProgress( 0, elements, elements );
+	if ( !quiet )
+		progressBar.updateProgress( 0, elements, elements );
 
 	return testPassed;
 }
