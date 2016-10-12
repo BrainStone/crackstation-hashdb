@@ -118,13 +118,40 @@ int main( int argc, char* argv[] ) {
 
 			const matchMode mMode( getMatchMode( (options[TEST_MATCH].arg == NULL) ? (testsFast ? "RANDOM_FULL" : "ALL") : options[TEST_MATCH].arg ) );
 
+			FileArray fileArray( idxFile );
+			const size_t indexElements = fileArray.getSize();
+			ProgressBar progressBar( {
+				{"Test: Sorted", testSorted ? indexElements : 0},
+				{"Test: Match", testMatch ? (((mMode & modeAll) ? indexElements : (size_t)sqrt( indexElements )) * (((mMode & modeFull) + (mMode & modePartial)) * 2)) : 0}
+			}, true );
+			std::unordered_map<std::string, bool> testResults;
+			std::vector<std::string> insertionOrder;
+			bool result;
+
+			std::cout << "\nRunning Tests:" << std::endl;
+			progressBar.start();
+
 			// Run tests here!
 			if ( testSorted ) {
-				// Test if file is sorted
+				testResults.insert( std::make_pair( "Sorted", runTestSorted( fileArray, progressBar ) ) );
+				insertionOrder.push_back( "Sorted" );
 			}
 
 			if ( testMatch ) {
 				// Test if the wordlist matches the 
+			}
+
+			progressBar.finish(true);
+
+			// Display results
+			std::cout << "\nTest Results:\n======================================" << std::endl;
+
+			for ( std::string test : insertionOrder ) {
+				result = testResults[test];
+				test += ':';
+				test.resize( 20, ' ' );
+
+				std::cout << "\tTest: " << test << (result ? "\33[32mOK" : "\33[1;31mFailed!") << "\33[0m" << std::endl;
 			}
 		}
 
@@ -164,7 +191,7 @@ int main( int argc, char* argv[] ) {
 }
 
 matchMode getMatchMode( std::string str ) {
-	static const std::map<std::string, matchMode> strToMatchMode {
+	static const std::unordered_map<std::string, matchMode> strToMatchMode {
 		{ "ALL", MATCH_ALL }, { "ALL_FULL", MATCH_ALL_FULL }, { "ALL_PARTIAL", MATCH_ALL_PARTIAL },
 		{ "RANDOM", MATCH_RANDOM }, { "RANDOM_FULL", MATCH_RANDOM_FULL }, { "RANDOM_PARTIAL", MATCH_RANDOM_PARTIAL }
 	};

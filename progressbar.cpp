@@ -63,7 +63,7 @@ void ProgressBar::init( const std::vector<Segment> & segments, extraDataFunc ext
 }
 
 void ProgressBar::start() {
-	std::cout << "\33[?25l";
+	std::cout << "\33[?25l" << (displaySubProgress ? "\n\n\n\n\n\33[5A" : "\n\n\33[2A");
 
 	startTime = HRC::now();
 	segmentStartTimes[0] = HRC::now();

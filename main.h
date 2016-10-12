@@ -3,9 +3,11 @@
 
 // Includes
 #include <iostream>
-#include <map>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
+#include "checkidx.h"
 #include "createidx.h"
 #include "optionparser.h"
 #include "progressbar.h"
