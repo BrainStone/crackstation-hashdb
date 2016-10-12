@@ -44,7 +44,8 @@ void ProgressBar::init( const std::vector<Segment> & segments, bool displaySubPr
 
 void ProgressBar::init( const std::vector<Segment> & segments, extraDataFunc extraDataGenerator, bool displaySubProgress ) {
 	if ( initialized )
-		throw InvalidStateException( "The progress bar has already been initialized!" );
+		// Should I throw an exception?
+		return;
 
 	this->segments.reserve( segments.size() );
 	segmentProgresses.resize( segments.size(), 0.0 );
@@ -91,7 +92,7 @@ void ProgressBar::finish( bool blocking ) {
 
 void ProgressBar::updateProgress( size_t numSegment, double progress ) {
 	if ( !initialized )
-		throw InvalidStateException( "The progress has not been initialized yet!" );
+		return;
 
 	if ( activeSegment != numSegment ) {
 		activeSegment = numSegment;
@@ -115,7 +116,7 @@ int ProgressBar::getNumSegments() {
 
 template<typename T>
 inline double ProgressBar::div( const T & lhs, const T & rhs ) {
-	return ((double)lhs) / ((double)rhs);
+	return static_cast<double>(lhs) / static_cast<double>(rhs);
 }
 
 std::string ProgressBar::getPercentString( double progress, size_t width ) {

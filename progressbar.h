@@ -9,7 +9,6 @@
 #include <memory>
 #include <mutex>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <thread>
 #include <tuple>
@@ -26,7 +25,6 @@ public:
 	typedef std::tuple<std::string, size_t, std::function<std::string( double )>> SegmentBase;
 	typedef std::function<std::string( double )> extraDataFunc;
 
-	class InvalidStateException;
 	class Segment;
 
 	ProgressBar();
@@ -76,11 +74,6 @@ private:
 };
 
 std::ostream & operator<<( std::ostream & os, ProgressBar::duration dSeconds );
-
-class ProgressBar::InvalidStateException : public std::runtime_error {
-	// Explicitly inheriting all constructors
-	using std::runtime_error::runtime_error;
-};
 
 class ProgressBar::Segment : public ProgressBar::SegmentBase {
 public:
