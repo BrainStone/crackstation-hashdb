@@ -222,7 +222,7 @@ $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 # Tests
 .PHONY: test
 test:
-	./test/test.sh
+	@./test/test.sh
 
 .PHONY: testclean
 testclean:
