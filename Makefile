@@ -12,7 +12,7 @@ LIBS = libcrypto
 # General compiler flags
 COMPILE_FLAGS = -std=c++11 -Wall -Wextra
 # Additional release-specific flags
-RCOMPILE_FLAGS = -D__NDEBUG__ -D_GLIBCXX_PARALLEL -march=native -Ofast -fassociative-math -freciprocal-math -fno-signed-zeros -fno-trapping-math -frename-registers -funroll-loops -fopenmp -fdata-sections -ffunction-sections -g0
+RCOMPILE_FLAGS = -D__NDEBUG__ -D_GLIBCXX_PARALLEL -march=native -O3 -fdata-sections -ffunction-sections -g0
 # Additional debug-specific flags
 DCOMPILE_FLAGS = -D__DEBUG__ -Og -g3
 # Add additional include paths

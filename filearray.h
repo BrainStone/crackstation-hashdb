@@ -44,6 +44,8 @@ private:
 	const posType fileSize;
 	const posType size;
 	const posType cacheSize;
+	posType readPos;
+	posType writePos;
 	std::vector<IndexEntry> cache;
 	ProgressBar* progressBar;
 	bool autoLoad;

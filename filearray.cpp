@@ -58,8 +58,11 @@ void FileArray::readEntry( IndexEntry & entry, FileArray::posType index ) {
 	if ( index < cacheSize ) {
 		entry = cache[index];
 	} else if ( index < size ) {
-		file.seekg( FileArray::IndexEntry::indexSize * index );
+		if ( readPos != index )
+			file.seekg( FileArray::IndexEntry::indexSize * (readPos = index) );
+
 		file >> entry;
+		++readPos;
 	}
 }
 
@@ -67,8 +70,11 @@ void FileArray::writeEntry( const IndexEntry & entry, FileArray::posType index )
 	if ( index < cacheSize ) {
 		cache[index] = entry;
 	} else if ( index < size ) {
-		file.seekp( FileArray::IndexEntry::indexSize * index );
+		if ( writePos != index )
+			file.seekp( FileArray::IndexEntry::indexSize * (writePos = index) );
+
 		file << entry;
+		++writePos;
 	}
 }
 

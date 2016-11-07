@@ -4,11 +4,16 @@
 #include <algorithm>
 #include <fstream>
 #include <memory>
+#include <random>
 #include <string>
 
+#include "createidx.h"
 #include "filearray.h"
 #include "progressbar.h"
+#include "search.h"
+#include "util.h"
 
-bool runTestSorted( const std::string & idxFile, ProgressBar & progressBar, bool quiet );
+bool runTestSorted( FileArray & fileArray, ProgressBar & progressBar, bool quiet );
+bool runTestMatch( const std::string & wordlist, FileArray & fileArray, const std::string & hashAlgorithm, matchMode mode, ProgressBar & progressBar, bool quiet );
 
 #endif

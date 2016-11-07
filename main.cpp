@@ -108,7 +108,7 @@ int main( int argc, char* argv[] ) {
 			const bool onlyIdxFile( nonOptions == 1 );
 			const std::string wordlist( onlyIdxFile ? "" : parse.nonOption( 0 ) );
 			const std::string idxFile( parse.nonOption( onlyIdxFile ? 0 : 1 ) );
-			const std::string hashName( onlyIdxFile ? "" : parse.nonOption( 2 ) );
+			const std::string hashAlgorithm( onlyIdxFile ? "" : parse.nonOption( 2 ) );
 
 			const bool testsAll( options[TESTS_ALL] );
 			const bool testsFast( options[TESTS_FAST] || (!testsAll && !options[TEST_SORTED] && !options[TEST_MATCH]) );
@@ -118,7 +118,8 @@ int main( int argc, char* argv[] ) {
 
 			const matchMode mMode( getMatchMode( (options[TEST_MATCH].arg == NULL) ? (testsFast ? "RANDOM_FULL" : "ALL") : options[TEST_MATCH].arg ) );
 
-			const size_t indexElements = FileArray::getSize( idxFile );
+			FileArray fileArray( idxFile );
+			const size_t indexElements = fileArray.getSize();
 			ProgressBar progressBar;
 			std::unordered_map<std::string, bool> testResults;
 			std::vector<std::string> insertionOrder;
@@ -130,19 +131,20 @@ int main( int argc, char* argv[] ) {
 
 				progressBar.init( {
 					{ "Test: Sorted", testSorted ? indexElements : 0 },
-					{ "Test: Match", testMatch ? (((mMode & modeAll) ? indexElements : (size_t)sqrt( indexElements )) * (((mMode & modeFull) + (mMode & modePartial)) * 2)) : 0 }
+					{ "Test: Match", testMatch ? ((((mMode & modeAll) ? indexElements : (size_t)sqrt( indexElements )) * (((mMode & modeFull) + (mMode & modePartial)) * 2)) << 10) : 0 }
 				}, true );
 				progressBar.start();
 			}
 
 			// Run tests here!
 			if ( testSorted ) {
-				testResults.insert( std::make_pair( "Sorted", runTestSorted( idxFile, progressBar, quiet ) ) );
+				testResults.insert( std::make_pair( "Sorted", runTestSorted( fileArray, progressBar, quiet ) ) );
 				insertionOrder.push_back( "Sorted" );
 			}
 
 			if ( testMatch ) {
-				// Test if the wordlist matches the 
+				testResults.insert( std::make_pair( "Match", runTestMatch( wordlist, fileArray, hashAlgorithm, mMode, progressBar, quiet ) ) );
+				insertionOrder.push_back( "Match" );
 			}
 
 			if ( !quiet ) {
@@ -178,13 +180,20 @@ int main( int argc, char* argv[] ) {
 		if ( mode == MODE_SEARCH ) {
 			const std::string wordlist( parse.nonOption( 0 ) );
 			const std::string idxFile( parse.nonOption( 1 ) );
-			const std::string hashName( parse.nonOption( 2 ) );
+			const std::string hashAlgorithm( parse.nonOption( 2 ) );
 			std::string hash;
 			std::vector<Match> matches;
 
+			std::ifstream wordlistFile( wordlist, std::ios::in );
+			FileArray fileArray( idxFile );
+			const std::unique_ptr<HashLib> hasher( HashLib::getHasher( hashAlgorithm ) );
+
+			if ( !wordlistFile.good() )
+				throw std::invalid_argument( "File \"" + wordlist + "\" does not exist!" );
+
 			for ( size_t i = 3; i < nonOptions; i++ ) {
 				hash = parse.nonOption( i );
-				matches = Match::getMatches( wordlist, idxFile, hashName, hash );
+				matches = Match::getMatches( wordlistFile, fileArray, hasher, hash );
 
 				if ( !quiet )
 					std::cout << "Matches for hash " << hash << ":\n";
