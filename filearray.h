@@ -5,11 +5,11 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 #include "hashlib.h"
 #include "progressbar.h"
 #include "util.h"
+#include "uninitializedarray.h"
 
 class FileArray {
 public:
@@ -46,7 +46,7 @@ private:
 	const posType cacheSize;
 	posType readPos;
 	posType writePos;
-	std::vector<IndexEntry> cache;
+        UninitializedArray<IndexEntry> cache;
 	ProgressBar* progressBar;
 	bool autoLoad;
 };

@@ -56,7 +56,7 @@ void ProgressBar::init( const std::vector<Segment> & segments, extraDataFunc ext
 		totalWeight += segment.getWeight();
 	}
 
-	this->extraDataGenerator = extraDataGenerator;
+	this->extraDataGenerator = std::move(extraDataGenerator);
 	this->displaySubProgress = displaySubProgress;
 
 	initialized = true;

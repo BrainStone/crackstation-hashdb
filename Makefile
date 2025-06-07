@@ -10,7 +10,7 @@ SRC_PATH = .
 # Space-separated pkg-config libraries used by this project
 LIBS = libcrypto
 # General compiler flags
-COMPILE_FLAGS = -std=c++11 -Wall -Wextra
+COMPILE_FLAGS = -std=c++23 -Wall -Wextra
 # Additional release-specific flags
 RCOMPILE_FLAGS = -D__NDEBUG__ -D_GLIBCXX_PARALLEL -march=native -O3 -fdata-sections -ffunction-sections -g0
 # Additional debug-specific flags
