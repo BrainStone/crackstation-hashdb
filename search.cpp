@@ -34,6 +34,7 @@ std::vector<Match> Match::getMatches( std::ifstream & wordlist, FileArray & inde
 		if ( centerElement != searchElement )
 			break;
 
+		wordlist.clear();
 		wordlist.seekg( centerElement.getOffset() );
 
 		getline( wordlist, line );
